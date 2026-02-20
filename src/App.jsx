@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react'
 
 /**
- * INSTITUTO TIA PRETINHA - VERSÃO CORRIGIDA (CONTADOR E CARREGAMENTO)
+ * INSTITUTO TIA PRETINHA - VERSÃO FINAL REVISADA
  * Desenvolvedor: Erick Gonçalves Cardoso
- * Correção: Leitura global de arquivos e ordenação de array.
+ * Ajustes: Menu responsivo (mobile/desktop) e Seção de Doações Completa.
  */
 
-// 1. IMPORTAÇÃO ULTRA-ABRANGENTE
+// 1. IMPORTAÇÃO DE IMAGENS
 const imagensImportadas = import.meta.glob('./carrosel_fotos/*.{jpeg,jpg,JPG,JPEG,png,PNG,webp}', { eager: true });
 
-// 2. ORGANIZAÇÃO E FILTRAGEM
+// 2. ORGANIZAÇÃO DA GALERIA
 const listaDeFotos = Object.values(imagensImportadas)
   .map((mod) => mod.default)
   .sort((a, b) => a.localeCompare(b));
@@ -75,19 +75,40 @@ function App() {
   return (
     <div className="min-h-screen bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden">
       
-      {/* NAVBAR */}
-      <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/95 backdrop-blur-xl border-b border-white/10 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <img src="/png_instituto.jpg" alt="Logo" className="h-12 md:h-16 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} />
-          <div className="hidden lg:flex items-center gap-6">
+      {/* NAVBAR REVISADA (RESPONSIVA) */}
+      <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/95 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
+          <img 
+            src="/png_instituto.jpg" 
+            alt="Logo" 
+            className="h-10 md:h-16 flex-shrink-0 cursor-pointer" 
+            onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} 
+          />
+          
+          {/* Menu com rolagem lateral no mobile e fixo no desktop */}
+          <div className="flex items-center gap-5 overflow-x-auto lg:overflow-visible no-scrollbar py-2 max-w-[60%] md:max-w-none">
             {['inicio', 'sobre-nos', 'projetos', 'galeria', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
-              <a key={item} href={`#${item}`} className={`text-[10px] font-black uppercase tracking-widest relative py-2 ${activeSection === item ? 'text-yellow-400' : 'text-purple-200'}`}>
+              <a 
+                key={item} 
+                href={`#${item}`} 
+                className={`text-[10px] font-black uppercase tracking-widest relative py-2 whitespace-nowrap flex-shrink-0 ${
+                  activeSection === item ? 'text-yellow-400' : 'text-purple-200'
+                }`}
+              >
                 {item.replace('-', ' ')}
-                {activeSection === item && <span className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full"></span>}
+                {activeSection === item && (
+                  <span className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full"></span>
+                )}
               </a>
             ))}
           </div>
-          <button onClick={copiarChavePix} className="bg-yellow-400 text-purple-950 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">PIX</button>
+
+          <button 
+            onClick={copiarChavePix} 
+            className="bg-yellow-400 text-purple-950 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex-shrink-0"
+          >
+            PIX
+          </button>
         </div>
       </nav>
 
@@ -137,11 +158,10 @@ function App() {
         </div>
       </section>
 
-      {/* GALERIA CORRIGIDA */}
+      {/* GALERIA */}
       <section id="galeria" className="py-40 bg-[#1F1235] px-8">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-5xl font-black mb-20 uppercase italic tracking-tighter">GALERIA</h2>
-          
           {fotosGaleria.length > 0 ? (
             <div className="relative h-[450px] md:h-[650px] rounded-[3rem] overflow-hidden border-4 border-white/5 shadow-2xl bg-black group">
               <img 
@@ -151,15 +171,12 @@ function App() {
                 loading="lazy" 
                 key={fotoAtual}
               />
-              
               <button onClick={fotoAnterior} className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-14 h-14 rounded-full z-20 font-black text-xl transition-all">←</button>
               <button onClick={proximaFoto} className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-14 h-14 rounded-full z-20 font-black text-xl transition-all">→</button>
-              
               <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-4">
                 <span className="bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-[12px] font-black tracking-widest border border-white/20">
                   {fotoAtual + 1} / {fotosGaleria.length}
                 </span>
-                
                 <div className="w-1/2 h-1 bg-white/10 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-yellow-400 transition-all duration-300" 
@@ -186,20 +203,17 @@ function App() {
       <section id="como-ajudar" className="py-40 px-8 bg-[#2D1B4D]">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-5xl font-black mb-20 uppercase tracking-tighter text-yellow-400">COMO AJUDAR</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
               <h3 className="text-2xl font-black mb-4 uppercase">Doações PIX</h3>
               <p className="text-purple-200/60 mb-8">Ajude a manter nossas oficinas e lanches.</p>
               <button onClick={copiarChavePix} className="mt-auto bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors">Copiar Chave</button>
             </div>
-
-            {/* QUADRO ADICIONADO: DOAÇÃO DE MATERIAIS */}
             <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
               <h3 className="text-2xl font-black mb-4 uppercase">Doação de Materiais</h3>
               <p className="text-purple-200/60 mb-8">Materiais escolares, roupas, alimentos e outros itens são sempre bem-vindos.</p>
               <a href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="mt-auto inline-block bg-yellow-400 text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-white transition-colors">Como Doar</a>
             </div>
-
             <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
               <h3 className="text-2xl font-black mb-4 uppercase">Voluntariado</h3>
               <p className="text-purple-200/60 mb-8">Compartilhe seu talento com nossas crianças.</p>
