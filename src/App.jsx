@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 
 /**
  * INSTITUTO TIA PRETINHA - VERSÃO ESTRATÉGICA ONG
@@ -304,6 +305,7 @@ function App() {
         <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em]">© 2025 Instituto Tia Pretinha • Todos os direitos reservados</p>
         <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6 italic">Arquitetura Digital por Erick Gonçalves Cardoso</p>
       </footer>
+      <Analytics />
     </div>
   )
 }
