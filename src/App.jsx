@@ -35,7 +35,7 @@ function App() {
   useEffect(() => {
     const nomesSessoes = {
       'inicio': 'Início', 'sobre-nos': 'Sobre Nós', 'projetos': 'Projetos',
-      'galeria': 'Galeria', 'transparencia': 'Transparência', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
+      'galeria': 'Galeria', 'transparência': 'Transparência', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
     };
     document.title = `Instituto Tia Pretinha | ${nomesSessoes[activeSection] || 'Bem-vindo'}`;
   }, [activeSection]);
@@ -43,7 +43,7 @@ function App() {
   // --- DETECÇÃO DE SCROLL ---
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'matricule-se', 'como-ajudar', 'contato'];
+      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparência', 'matricule-se', 'como-ajudar', 'contato'];
       const scrollPosition = window.scrollY + 250;
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -100,7 +100,7 @@ function App() {
           />
           
           <div className="flex items-center gap-5 overflow-x-auto lg:overflow-visible no-scrollbar py-2 max-w-[60%] md:max-w-none">
-            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
+            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparência', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
               <a 
                 key={item} 
                 href={`#${item}`} 
@@ -207,7 +207,7 @@ function App() {
       </section>
 
       {/* PRESTAÇÃO DE CONTAS */}
-      <section id="transparencia" className="py-40 bg-[#2D1B4D] px-8 relative overflow-hidden">
+      <section id="transparência" className="py-40 bg-[#2D1B4D] px-8 relative overflow-hidden">
         <div className="max-w-7xl mx-auto text-center md:text-left">
           <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-20 gap-8">
             <div>
