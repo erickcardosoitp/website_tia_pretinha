@@ -1,0 +1,245 @@
+import React, { useState, useEffect, useMemo } from 'react'
+
+/**
+ * INSTITUTO TIA PRETINHA - VERSÃO CORRIGIDA (CONTADOR E CARREGAMENTO)
+ * Desenvolvedor: Erick Gonçalves Cardoso
+ * Correção: Leitura global de arquivos e ordenação de array.
+ */
+
+// 1. IMPORTAÇÃO ULTRA-ABRANGENTE
+const imagensImportadas = import.meta.glob('./carrosel_fotos/*.{jpeg,jpg,JPG,JPEG,png,PNG,webp}', { eager: true });
+
+// 2. ORGANIZAÇÃO E FILTRAGEM
+const listaDeFotos = Object.values(imagensImportadas)
+  .map((mod) => mod.default)
+  .sort((a, b) => a.localeCompare(b));
+
+function App() {
+  const [activeSection, setActiveSection] = useState('inicio');
+  const [projetoSelecionado, setProjetoSelecionado] = useState(null);
+  const [fotoAtual, setFotoAtual] = useState(0);
+
+  // --- LÓGICA DA GALERIA ---
+  const fotosGaleria = useMemo(() => listaDeFotos, []);
+
+  const proximaFoto = () => {
+    setFotoAtual((prev) => (prev + 1) % fotosGaleria.length);
+  };
+
+  const fotoAnterior = () => {
+    setFotoAtual((prev) => (prev - 1 + fotosGaleria.length) % fotosGaleria.length);
+  };
+
+  // --- TÍTULO DA PÁGINA ---
+  useEffect(() => {
+    const nomesSessoes = {
+      'inicio': 'Início', 'sobre-nos': 'Sobre Nós', 'projetos': 'Projetos',
+      'galeria': 'Galeria', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
+    };
+    document.title = `Instituto Tia Pretinha | ${nomesSessoes[activeSection] || 'Bem-vindo'}`;
+  }, [activeSection]);
+
+  // --- DETECÇÃO DE SCROLL ---
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'matricule-se', 'como-ajudar', 'contato'];
+      const scrollPosition = window.scrollY + 250;
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element && scrollPosition >= element.offsetTop && scrollPosition < element.offsetTop + element.offsetHeight) {
+          setActiveSection(section);
+          break;
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const copiarChavePix = () => {
+    navigator.clipboard.writeText("21965540576");
+    alert("Chave PIX copiada! 💜");
+  }
+
+  const projetos = [
+    { id: 1, titulo: "Informática", prof: "Erick", desc: "Capacitação digital.", detalhe: "Ferramentas de produtividade.", img: "/pretina_ti.jpeg" },
+    { id: 2, titulo: "Ballet Clássico", prof: "Ellen", desc: "Expressão artística.", detalhe: "Consciência corporal.", img: "/pretinha_ballet.jpeg" },
+    { id: 3, titulo: "Jiu-Jitsu", prof: "Tico", desc: "Defesa pessoal.", detalhe: "Valores e autoconfiança.", img: "/pretinha_jiujtsu.jpeg" },
+    { id: 4, titulo: "Karatê", prof: "EM BREVE!", desc: "Disciplina mental.", detalhe: "Novas turmas em breve.", img: "/pretinha_jiujtsu.jpeg" },
+    { id: 5, titulo: "Capoeira", prof: "Anderson", desc: "Cultura e esporte.", detalhe: "Herança afro-brasileira.", img: "/pretinha_jiujtsu.jpeg" },
+    { id: 6, titulo: "Futebol", prof: "EM BREVE!", desc: "Integração social.", detalhe: "Trabalho em equipe.", img: "/pretinha_fut.jpeg" },
+    { id: 7, titulo: "Inglês", prof: "Karina", desc: "Novo idioma.", detalhe: "Prática e conversação.", img: "/pretinha_ingles.jpeg" },
+    { id: 8, titulo: "Reforço Escolar", prof: "Érica", desc: "Apoio pedagógico.", detalhe: "Português e Matemática.", img: null }
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden">
+      
+      {/* NAVBAR */}
+      <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/95 backdrop-blur-xl border-b border-white/10 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <img src="/png_instituto.jpg" alt="Logo" className="h-12 md:h-16 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} />
+          <div className="hidden lg:flex items-center gap-6">
+            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
+              <a key={item} href={`#${item}`} className={`text-[10px] font-black uppercase tracking-widest relative py-2 ${activeSection === item ? 'text-yellow-400' : 'text-purple-200'}`}>
+                {item.replace('-', ' ')}
+                {activeSection === item && <span className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full"></span>}
+              </a>
+            ))}
+          </div>
+          <button onClick={copiarChavePix} className="bg-yellow-400 text-purple-950 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">PIX</button>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <header id="inicio" className="relative min-h-screen flex items-center justify-center pt-20 px-8 text-center">
+        <div className="max-w-5xl z-10">
+          <h1 className="text-5xl md:text-9xl font-black leading-none mb-8 uppercase tracking-tighter italic">Instituto <br/><span className="text-yellow-400">Tia Pretinha</span></h1>
+          <p className="text-xl md:text-2xl text-purple-100 max-w-4xl mx-auto font-light mb-12 italic">"Transformando vidas com afeto e ação."</p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <a href="#matricule-se" className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-2xl font-black text-lg hover:scale-105 transition-transform">MATRICULE-SE</a>
+            <a href="#projetos" className="bg-purple-600/30 border-2 border-white/20 px-12 py-5 rounded-2xl font-black text-lg">PROJETOS</a>
+          </div>
+        </div>
+      </header>
+
+      {/* SOBRE NÓS */}
+      <section id="sobre-nos" className="py-40 bg-[#1F1235] px-8 text-center">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-5xl md:text-7xl font-black mb-10 uppercase italic">SOBRE NÓS</h2>
+          <p className="text-2xl md:text-4xl text-yellow-400 font-medium leading-tight mb-12 italic max-w-5xl mx-auto">"Aqui também é possível vencer."</p>
+          <div className="h-2 w-24 bg-purple-500 mx-auto rounded-full opacity-30"></div>
+          <p className="mt-12 text-purple-100/80 text-lg max-w-3xl mx-auto leading-relaxed">
+            O Instituto Tia Pretinha é um projeto que nasceu do coração da comunidade para oferecer esporte, cultura e educação para quem mais precisa.
+          </p>
+        </div>
+      </section>
+
+      {/* PROJETOS */}
+      <section id="projetos" className="py-40 px-8 bg-[#2D1B4D]">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-5xl font-black mb-20 text-center uppercase tracking-tighter">PROJETOS</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {projetos.map((p) => (
+              <div key={p.id} className="bg-[#1F1235] rounded-[3rem] overflow-hidden border border-white/5 flex flex-col h-full group">
+                <div className="h-64 bg-purple-900 relative overflow-hidden flex items-center justify-center">
+                  {p.img ? <img src={p.img} alt={p.titulo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /> : <div className="text-2xl font-black opacity-20">{p.titulo}</div>}
+                </div>
+                <div className="p-8 flex flex-col flex-grow">
+                  <h3 className="text-2xl font-black text-yellow-400 mb-1 uppercase tracking-tighter">{p.titulo}</h3>
+                  <p className="text-[10px] font-black uppercase text-purple-400 mb-4">{p.prof === "EM BREVE!" ? p.prof : `Prof. ${p.prof}`}</p>
+                  <p className="text-sm text-purple-100/70 mb-8">{p.desc}</p>
+                  <button onClick={() => setProjetoSelecionado(p)} className="mt-auto text-[10px] font-black uppercase tracking-widest bg-purple-700/50 px-6 py-4 rounded-2xl hover:bg-yellow-400 hover:text-purple-950 transition-all">Saiba Mais</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* GALERIA CORRIGIDA */}
+      <section id="galeria" className="py-40 bg-[#1F1235] px-8">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-5xl font-black mb-20 uppercase italic tracking-tighter">GALERIA</h2>
+          
+          {fotosGaleria.length > 0 ? (
+            <div className="relative h-[450px] md:h-[650px] rounded-[3rem] overflow-hidden border-4 border-white/5 shadow-2xl bg-black group">
+              <img 
+                src={fotosGaleria[fotoAtual]} 
+                alt={`Foto ${fotoAtual + 1}`} 
+                className="w-full h-full object-cover transition-opacity duration-500"
+                loading="lazy" 
+                key={fotoAtual}
+              />
+              
+              <button onClick={fotoAnterior} className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-14 h-14 rounded-full z-20 font-black text-xl transition-all">←</button>
+              <button onClick={proximaFoto} className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-14 h-14 rounded-full z-20 font-black text-xl transition-all">→</button>
+              
+              <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-4">
+                <span className="bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-[12px] font-black tracking-widest border border-white/20">
+                  {fotoAtual + 1} / {fotosGaleria.length}
+                </span>
+                
+                <div className="w-1/2 h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-yellow-400 transition-all duration-300" 
+                    style={{ width: `${((fotoAtual + 1) / fotosGaleria.length) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="py-20 border-2 border-dashed border-white/10 rounded-[3rem] text-purple-400">
+              Nenhuma foto encontrada em src/carrosel_fotos/
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* MATRICULE-SE */}
+      <section id="matricule-se" className="py-32 bg-yellow-400 text-purple-950 px-8 text-center">
+        <h2 className="text-5xl md:text-8xl font-black mb-10 uppercase tracking-tighter italic">MATRICULE-SE</h2>
+        <a href="https://forms.gle/wddeiiAL3Fgn8feJ8" target="_blank" rel="noopener noreferrer" className="inline-block bg-purple-950 text-white px-16 py-6 rounded-3xl font-black text-2xl shadow-2xl hover:scale-105 transition-transform">INSCREVER AGORA</a>
+      </section>
+
+      {/* AJUDA / PIX / MATERIAIS */}
+      <section id="como-ajudar" className="py-40 px-8 bg-[#2D1B4D]">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-5xl font-black mb-20 uppercase tracking-tighter text-yellow-400">COMO AJUDAR</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
+              <h3 className="text-2xl font-black mb-4 uppercase">Doações PIX</h3>
+              <p className="text-purple-200/60 mb-8">Ajude a manter nossas oficinas e lanches.</p>
+              <button onClick={copiarChavePix} className="mt-auto bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors">Copiar Chave</button>
+            </div>
+
+            {/* QUADRO ADICIONADO: DOAÇÃO DE MATERIAIS */}
+            <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
+              <h3 className="text-2xl font-black mb-4 uppercase">Doação de Materiais</h3>
+              <p className="text-purple-200/60 mb-8">Materiais escolares, roupas, alimentos e outros itens são sempre bem-vindos.</p>
+              <a href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="mt-auto inline-block bg-yellow-400 text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-white transition-colors">Como Doar</a>
+            </div>
+
+            <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
+              <h3 className="text-2xl font-black mb-4 uppercase">Voluntariado</h3>
+              <p className="text-purple-200/60 mb-8">Compartilhe seu talento com nossas crianças.</p>
+              <a href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="mt-auto inline-block bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors">Quero Ajudar</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTATO */}
+      <section id="contato" className="py-40 bg-[#1F1235] px-8 border-t border-white/5">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-5xl font-black mb-16 uppercase italic tracking-tighter">CONTATO</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <a href="https://www.instagram.com/ins.tia_pretinha/" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-all font-black uppercase text-[12px] tracking-widest">Instagram</a>
+            <a href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-all font-black uppercase text-[12px] tracking-widest">WhatsApp</a>
+            <a href="https://www.facebook.com/profile.php?id=100086387738515" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-all font-black uppercase text-[12px] tracking-widest">Facebook</a>
+          </div>
+        </div>
+      </section>
+
+      {/* MODAL */}
+      {projetoSelecionado && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-purple-950/98 backdrop-blur-xl">
+          <div className="bg-white text-purple-950 max-w-2xl w-full rounded-[4rem] p-12 relative shadow-2xl">
+            <button onClick={() => setProjetoSelecionado(null)} className="absolute top-8 right-10 text-3xl font-black">✕</button>
+            <h3 className="text-4xl font-black uppercase mb-6 tracking-tighter">{projetoSelecionado.titulo}</h3>
+            <p className="text-xl text-slate-700 mb-10 leading-relaxed font-light italic">"{projetoSelecionado.detalhe}"</p>
+            <button onClick={() => setProjetoSelecionado(null)} className="bg-purple-700 text-white px-8 py-5 rounded-2xl font-black w-full uppercase tracking-widest shadow-lg">Fechar</button>
+          </div>
+        </div>
+      )}
+
+      {/* FOOTER */}
+      <footer className="bg-black py-16 px-8 text-center border-t border-white/5">
+        <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em]">© 2025 Instituto Tia Pretinha • Todos os direitos reservados</p>
+        <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6">Arquitetura Digital por Erick Gonçalves Cardoso</p>
+      </footer>
+    </div>
+  )
+}
+
+export default App

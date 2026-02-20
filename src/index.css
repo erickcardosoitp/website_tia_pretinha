@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Definindo as cores do Instituto direto no CSS (Padrão v4) */
+@theme {
+  --color-roxo-principal: #6B21A8;
+  --color-amarelo-destaque: #FACC15;
+}
