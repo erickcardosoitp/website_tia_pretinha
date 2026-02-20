@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 /**
  * INSTITUTO TIA PRETINHA - VERSÃO ESTRATÉGICA ONG
  * Desenvolvedor: Erick Gonçalves Cardoso
- * Adição: Seção de Prestação de Contas (Transparência)
+ * Adição: Toast Notification para PIX (Substituindo o Alert)
  */
 
 // 1. IMPORTAÇÃO DE IMAGENS
@@ -18,6 +18,7 @@ function App() {
   const [activeSection, setActiveSection] = useState('inicio');
   const [projetoSelecionado, setProjetoSelecionado] = useState(null);
   const [fotoAtual, setFotoAtual] = useState(0);
+  const [showPixToast, setShowPixToast] = useState(false); // Estado para o Toast
 
   // --- LÓGICA DA GALERIA ---
   const fotosGaleria = useMemo(() => listaDeFotos, []);
@@ -56,9 +57,11 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // --- LÓGICA DO PIX REVISADA ---
   const copiarChavePix = () => {
     navigator.clipboard.writeText("21965540576");
-    alert("Chave PIX copiada! 💜");
+    setShowPixToast(true);
+    setTimeout(() => setShowPixToast(false), 3000); // Esconde após 3 segundos
   }
 
   const projetos = [
@@ -75,7 +78,18 @@ function App() {
   return (
     <div className="min-h-screen bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden">
       
-      {/* NAVBAR REVISADA */}
+      {/* TOAST NOTIFICATION (PIX) */}
+      <div className={`fixed bottom-10 right-10 z-[300] transition-all duration-500 transform ${showPixToast ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+        <div className="bg-yellow-400 text-purple-950 px-8 py-4 rounded-2xl font-black shadow-2xl flex items-center gap-4">
+          <span className="text-2xl">💜</span>
+          <div className="flex flex-col">
+            <span className="text-xs uppercase tracking-widest opacity-70">Sucesso</span>
+            <span className="uppercase italic">Chave PIX Copiada!</span>
+          </div>
+        </div>
+      </div>
+
+      {/* NAVBAR */}
       <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/95 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
           <img 
@@ -104,7 +118,7 @@ function App() {
 
           <button 
             onClick={copiarChavePix} 
-            className="bg-yellow-400 text-purple-950 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex-shrink-0"
+            className="bg-yellow-400 text-purple-950 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex-shrink-0 active:scale-95 transition-transform"
           >
             PIX
           </button>
@@ -192,76 +206,63 @@ function App() {
         </div>
       </section>
 
-      {/* NOVA SEÇÃO: PRESTAÇÃO DE CONTAS (TRANSPARÊNCIA) */}
+      {/* PRESTAÇÃO DE CONTAS */}
       <section id="transparencia" className="py-40 bg-[#2D1B4D] px-8 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-            <div className="text-left">
+        <div className="max-w-7xl mx-auto text-center md:text-left">
+          <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-20 gap-8">
+            <div>
               <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">Prestação de <br/><span className="text-yellow-400">Contas</span></h2>
-              <p className="mt-6 text-purple-200/60 max-w-xl text-lg uppercase font-black tracking-widest">Transparência total com cada centavo investido no futuro das nossas crianças.</p>
+              <p className="mt-6 text-purple-200/60 max-w-xl text-lg uppercase font-black tracking-widest mx-auto md:mx-0">Transparência total com cada centavo investido no futuro das nossas crianças.</p>
             </div>
             <div className="bg-yellow-400 text-purple-950 px-8 py-4 rounded-2xl font-black text-2xl animate-pulse">
               EM BREVE!
             </div>
           </div>
 
-          {/* MODELO DE RELATÓRIO (ESQUELETO) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 opacity-40 grayscale">
-            {[
-              { periodo: "1º Trimestre 2025", status: "Em processamento" },
-              { periodo: "2º Trimestre 2025", status: "Agendado" },
-              { periodo: "3º Trimestre 2025", status: "Agendado" }
-            ].map((card, i) => (
-              <div key={i} className="bg-[#1F1235] p-10 rounded-[3rem] border border-white/10 flex flex-col items-start text-left">
-                <div className="w-12 h-12 bg-purple-500/20 rounded-full mb-6 flex items-center justify-center">
-                  <span className="text-purple-400">📄</span>
-                </div>
-                <h3 className="text-xl font-black uppercase mb-2">{card.periodo}</h3>
-                <p className="text-sm text-purple-300/50 mb-8 font-bold uppercase tracking-widest">{card.status}</p>
-                <div className="w-full h-2 bg-white/5 rounded-full mb-4"></div>
-                <div className="w-2/3 h-2 bg-white/5 rounded-full"></div>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-[#1F1235] p-10 rounded-[3rem] border border-white/10">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-full mb-6 flex items-center justify-center text-purple-400">📄</div>
+                <div className="w-full h-4 bg-white/10 rounded-full mb-4"></div>
+                <div className="w-2/3 h-4 bg-white/5 rounded-full"></div>
               </div>
             ))}
-          </div>
-
-          <div className="mt-20 p-12 bg-[#1F1235] rounded-[4rem] border border-yellow-400/20 text-center">
-            <p className="text-yellow-400 font-black uppercase tracking-[0.3em] text-sm">Estamos organizando nossos balancetes financeiros para visualização pública.</p>
           </div>
         </div>
       </section>
 
       {/* MATRICULE-SE */}
       <section id="matricule-se" className="py-32 bg-yellow-400 text-purple-950 px-8 text-center">
-        <h2 className="text-5xl md:text-8xl font-black mb-10 uppercase tracking-tighter italic">MATRICULE-SE</h2>
-        <a href="https://forms.gle/wddeiiAL3Fgn8feJ8" target="_blank" rel="noopener noreferrer" className="inline-block bg-purple-950 text-white px-16 py-6 rounded-3xl font-black text-2xl shadow-2xl hover:scale-105 transition-transform">INSCREVER AGORA</a>
+        <h2 className="text-5xl md:text-8xl font-black mb-10 uppercase tracking-tighter italic text-center">MATRICULE-SE</h2>
+        <a href="https://forms.gle/wddeiiAL3Fgn8feJ8" target="_blank" rel="noopener noreferrer" className="inline-block bg-purple-950 text-white px-16 py-6 rounded-3xl font-black text-2xl shadow-2xl hover:scale-105 transition-transform uppercase">Inscrição Online</a>
       </section>
 
-      {/* AJUDA / PIX / MATERIAIS */}
+      {/* AJUDA / PIX */}
       <section id="como-ajudar" className="py-40 px-8 bg-[#2D1B4D]">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-5xl font-black mb-20 uppercase tracking-tighter text-yellow-400">COMO AJUDAR</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
-              <h3 className="text-2xl font-black mb-4 uppercase">Doações PIX</h3>
-              <p className="text-purple-200/60 mb-8">Ajude a manter nossas oficinas e lanches.</p>
-              <button onClick={copiarChavePix} className="mt-auto bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors">Copiar Chave</button>
-            </div>
-            <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
-              <h3 className="text-2xl font-black mb-4 uppercase">Doação de Materiais</h3>
-              <p className="text-purple-200/60 mb-8">Materiais escolares, roupas, alimentos e outros itens são sempre bem-vindos.</p>
-              <a href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="mt-auto inline-block bg-yellow-400 text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-white transition-colors">Como Doar</a>
-            </div>
-            <div className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col">
-              <h3 className="text-2xl font-black mb-4 uppercase">Voluntariado</h3>
-              <p className="text-purple-200/60 mb-8">Compartilhe seu talento com nossas crianças.</p>
-              <a href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="mt-auto inline-block bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors">Quero Ajudar</a>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            {[
+              { t: "Doações PIX", d: "Ajude a manter nossas oficinas e lanches.", b: "Copiar Chave", act: copiarChavePix },
+              { t: "Materiais", d: "Roupas, alimentos e itens escolares.", b: "Como Doar", link: "https://wa.me/5521965540576" },
+              { t: "Voluntário", d: "Compartilhe seu talento conosco.", b: "Quero Ajudar", link: "https://wa.me/5521965540576" }
+            ].map((item, idx) => (
+              <div key={idx} className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col h-full">
+                <h3 className="text-2xl font-black mb-4 uppercase">{item.t}</h3>
+                <p className="text-purple-200/60 mb-8">{item.d}</p>
+                {item.act ? (
+                  <button onClick={item.act} className="mt-auto bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors">{item.b}</button>
+                ) : (
+                  <a href={item.link} target="_blank" rel="noreferrer" className="mt-auto inline-block bg-yellow-400 text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-white text-center transition-colors">{item.b}</a>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CONTATO */}
-      <section id="contato" className="py-40 bg-[#1F1235] px-8 border-t border-white/5">
+      <section id="contato" className="py-40 bg-[#1F1235] px-8">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-5xl font-black mb-16 uppercase italic tracking-tighter">CONTATO</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -272,14 +273,14 @@ function App() {
         </div>
       </section>
 
-      {/* MODAL */}
+      {/* MODAL PROJETOS */}
       {projetoSelecionado && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-purple-950/98 backdrop-blur-xl">
-          <div className="bg-white text-purple-950 max-w-2xl w-full rounded-[4rem] p-12 relative shadow-2xl">
+          <div className="bg-white text-purple-950 max-w-2xl w-full rounded-[4rem] p-12 relative">
             <button onClick={() => setProjetoSelecionado(null)} className="absolute top-8 right-10 text-3xl font-black">✕</button>
             <h3 className="text-4xl font-black uppercase mb-6 tracking-tighter">{projetoSelecionado.titulo}</h3>
             <p className="text-xl text-slate-700 mb-10 leading-relaxed font-light italic">"{projetoSelecionado.detalhe}"</p>
-            <button onClick={() => setProjetoSelecionado(null)} className="bg-purple-700 text-white px-8 py-5 rounded-2xl font-black w-full uppercase tracking-widest shadow-lg">Fechar</button>
+            <button onClick={() => setProjetoSelecionado(null)} className="bg-purple-700 text-white px-8 py-5 rounded-2xl font-black w-full uppercase tracking-widest">Fechar</button>
           </div>
         </div>
       )}
@@ -287,7 +288,7 @@ function App() {
       {/* FOOTER */}
       <footer className="bg-black py-16 px-8 text-center border-t border-white/5">
         <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em]">© 2025 Instituto Tia Pretinha • Todos os direitos reservados</p>
-        <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6">Arquitetura Digital por Erick Gonçalves Cardoso</p>
+        <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6 italic">Arquitetura Digital por Erick Gonçalves Cardoso</p>
       </footer>
     </div>
   )
