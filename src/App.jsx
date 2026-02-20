@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
 
 /**
- * INSTITUTO TIA PRETINHA - VERSÃO FINAL REVISADA
+ * INSTITUTO TIA PRETINHA - VERSÃO ESTRATÉGICA ONG
  * Desenvolvedor: Erick Gonçalves Cardoso
- * Ajustes: Menu responsivo (mobile/desktop) e Seção de Doações Completa.
+ * Adição: Seção de Prestação de Contas (Transparência)
  */
 
 // 1. IMPORTAÇÃO DE IMAGENS
@@ -34,7 +34,7 @@ function App() {
   useEffect(() => {
     const nomesSessoes = {
       'inicio': 'Início', 'sobre-nos': 'Sobre Nós', 'projetos': 'Projetos',
-      'galeria': 'Galeria', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
+      'galeria': 'Galeria', 'transparencia': 'Transparência', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
     };
     document.title = `Instituto Tia Pretinha | ${nomesSessoes[activeSection] || 'Bem-vindo'}`;
   }, [activeSection]);
@@ -42,7 +42,7 @@ function App() {
   // --- DETECÇÃO DE SCROLL ---
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'matricule-se', 'como-ajudar', 'contato'];
+      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'matricule-se', 'como-ajudar', 'contato'];
       const scrollPosition = window.scrollY + 250;
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -75,7 +75,7 @@ function App() {
   return (
     <div className="min-h-screen bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden">
       
-      {/* NAVBAR REVISADA (RESPONSIVA) */}
+      {/* NAVBAR REVISADA */}
       <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/95 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
           <img 
@@ -85,9 +85,8 @@ function App() {
             onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} 
           />
           
-          {/* Menu com rolagem lateral no mobile e fixo no desktop */}
           <div className="flex items-center gap-5 overflow-x-auto lg:overflow-visible no-scrollbar py-2 max-w-[60%] md:max-w-none">
-            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
+            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
               <a 
                 key={item} 
                 href={`#${item}`} 
@@ -190,6 +189,44 @@ function App() {
               Nenhuma foto encontrada em src/carrosel_fotos/
             </div>
           )}
+        </div>
+      </section>
+
+      {/* NOVA SEÇÃO: PRESTAÇÃO DE CONTAS (TRANSPARÊNCIA) */}
+      <section id="transparencia" className="py-40 bg-[#2D1B4D] px-8 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+            <div className="text-left">
+              <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">Prestação de <br/><span className="text-yellow-400">Contas</span></h2>
+              <p className="mt-6 text-purple-200/60 max-w-xl text-lg uppercase font-black tracking-widest">Transparência total com cada centavo investido no futuro das nossas crianças.</p>
+            </div>
+            <div className="bg-yellow-400 text-purple-950 px-8 py-4 rounded-2xl font-black text-2xl animate-pulse">
+              EM BREVE!
+            </div>
+          </div>
+
+          {/* MODELO DE RELATÓRIO (ESQUELETO) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 opacity-40 grayscale">
+            {[
+              { periodo: "1º Trimestre 2025", status: "Em processamento" },
+              { periodo: "2º Trimestre 2025", status: "Agendado" },
+              { periodo: "3º Trimestre 2025", status: "Agendado" }
+            ].map((card, i) => (
+              <div key={i} className="bg-[#1F1235] p-10 rounded-[3rem] border border-white/10 flex flex-col items-start text-left">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-full mb-6 flex items-center justify-center">
+                  <span className="text-purple-400">📄</span>
+                </div>
+                <h3 className="text-xl font-black uppercase mb-2">{card.periodo}</h3>
+                <p className="text-sm text-purple-300/50 mb-8 font-bold uppercase tracking-widest">{card.status}</p>
+                <div className="w-full h-2 bg-white/5 rounded-full mb-4"></div>
+                <div className="w-2/3 h-2 bg-white/5 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-20 p-12 bg-[#1F1235] rounded-[4rem] border border-yellow-400/20 text-center">
+            <p className="text-yellow-400 font-black uppercase tracking-[0.3em] text-sm">Estamos organizando nossos balancetes financeiros para visualização pública.</p>
+          </div>
         </div>
       </section>
 
