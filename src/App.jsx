@@ -75,22 +75,21 @@ function App() {
     setTimeout(() => setShowPixToast(false), 3000);
   }
 
-// --- LISTA DE PROJETOS ATUALIZADA E REVISADA ---
-  const projetos = [
+const projetos = [
     { 
       id: 1, 
       titulo: "Informática", 
       prof: "Erick", 
       desc: "Capacitação digital.", 
-      detalhe: "Ferramentas de produtividade e introdução ao mundo tech.", 
-      img: "/pretinha_ti.jpeg" // Corrigido de 'pretina' para 'pretinha'
+      detalhe: "Ferramentas de produtividade.", 
+      img: "/pretinha_ti.jpeg" 
     },
     { 
       id: 2, 
       titulo: "Ballet Clássico", 
       prof: "Ellen", 
       desc: "Expressão artística.", 
-      detalhe: "Desenvolvimento da consciência corporal e disciplina artística.", 
+      detalhe: "Consciência corporal.", 
       img: "/pretinha_ballet.jpeg" 
     },
     { 
@@ -98,31 +97,31 @@ function App() {
       titulo: "Jiu-Jitsu", 
       prof: "Tico", 
       desc: "Defesa pessoal.", 
-      detalhe: "Construção de valores, respeito e autoconfiança.", 
-      img: "/pretinha_jiujtsu.jpeg" 
+      detalhe: "Valores e autoconfiança.", 
+      img: "/pretinha_jiujitsu.jpeg" 
     },
     { 
       id: 4, 
       titulo: "Danças Contemporâneas", 
       prof: "Letícia", 
       desc: "Movimento e criatividade.", 
-      detalhe: "Exploração da linguagem corporal e ritmos modernos.", 
-      img: "/pretinha_danca.jpeg" // Nova imagem adicionada
+      detalhe: "Exploração da linguagem corporal.", 
+      img: "/pretinha_danca.jpeg" 
     },
     { 
       id: 5, 
       titulo: "Capoeira", 
       prof: "Anderson", 
       desc: "Cultura e esporte.", 
-      detalhe: "Preservação da herança afro-brasileira através do movimento.", 
-      img: "/pretinha_jiujtsu.jpeg" 
+      detalhe: "Herança afro-brasileira.", 
+      img: "/pretinha_capoeira.jpeg" 
     },
     { 
       id: 6, 
       titulo: "Futebol", 
       prof: "EM BREVE!", 
       desc: "Integração social.", 
-      detalhe: "Trabalho em equipe e saúde através do esporte.", 
+      detalhe: "Trabalho em equipe.", 
       img: "/pretinha_fut.jpeg" 
     },
     { 
@@ -130,7 +129,7 @@ function App() {
       titulo: "Inglês", 
       prof: "Karina", 
       desc: "Novo idioma.", 
-      detalhe: "Prática dinâmica de conversação e gramática básica.", 
+      detalhe: "Prática e conversação.", 
       img: "/pretinha_ingles.jpeg" 
     },
     { 
@@ -138,8 +137,8 @@ function App() {
       titulo: "Reforço Escolar", 
       prof: "Érica", 
       desc: "Apoio pedagógico.", 
-      detalhe: "Auxílio focado em Português e Matemática para o desenvolvimento escolar.", 
-      img: "/pretinha_prevest.jpeg" // Imagem adicionada conforme solicitado
+      detalhe: "Português e Matemática.", 
+      img: "/pretinha_prevest.jpeg" 
     }
   ];
 
