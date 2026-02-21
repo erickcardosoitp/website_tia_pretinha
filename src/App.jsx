@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { Analytics } from "@vercel/analytics/react" // <-- Adicione esta linha
 
 /**
  * INSTITUTO TIA PRETINHA - VERSÃO ESTRATÉGICA ONG
@@ -87,7 +88,7 @@ function App() {
     },
     { 
       id: 2, 
-      titulo: "Ballet Clássico", 
+      titulo: "Ballet Clássico",
       prof: "Ellen", 
       desc: "Expressão artística.", 
       detalhe: "Consciência corporal.", 
@@ -146,7 +147,7 @@ function App() {
   return (
     <div className="min-h-screen bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden">
       
-      
+
 {/* BOTÃO FLUTUANTE - MARKETPLACE */}
 <a
   href="/marketplace"
@@ -407,10 +408,11 @@ function App() {
         <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em]">© 2025 Instituto Tia Pretinha • Todos os direitos reservados</p>
         <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6 italic">Arquitetura Digital por Erick Gonçalves Cardoso</p>
       </footer>
+
+      <Analytics /> {}
     </div>
   )
+  
 }
-
-
 
 export default App
