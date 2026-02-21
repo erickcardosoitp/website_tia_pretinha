@@ -214,29 +214,39 @@ const projetos = [
       </section>
 
       {/* PROJETOS */}
-      <section id="projetos" className="py-40 px-8 bg-[#2D1B4D]">
-        <div className="max-w-7xl mx-auto">
+        <section id="projetos" className="py-40 px-8 bg-[#2D1B4D]">
+          <div className="max-w-7xl mx-auto">
           <h2 className="text-5xl font-black mb-20 text-center uppercase tracking-tighter reveal transition-all duration-700 opacity-0 translate-y-10">PROJETOS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {projetos.map((p, idx) => (
               <div key={p.id} 
                 className="bg-[#1F1235] rounded-[3rem] overflow-hidden border border-white/5 flex flex-col h-full group reveal transition-all duration-700 transform opacity-0 translate-y-10 shadow-xl hover:shadow-2xl hover:shadow-black/40 transition-shadow"
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
-                <div className="h-64 bg-purple-900 relative overflow-hidden flex items-center justify-center">
-                  {p.img ? <img src={p.img} alt={p.titulo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /> : <div className="text-2xl font-black opacity-20">{p.titulo}</div>}
-                </div>
-                <div className="p-8 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-black text-yellow-400 mb-1 uppercase tracking-tighter">{p.titulo}</h3>
-                  <p className="text-[10px] font-black uppercase text-purple-400 mb-4">{p.prof === "EM BREVE!" ? p.prof : `Prof. ${p.prof}`}</p>
-                  <p className="text-sm text-purple-100/70 mb-8">{p.desc}</p>
-                  <button onClick={() => setProjetoSelecionado(p)} className="mt-auto text-[10px] font-black uppercase tracking-widest bg-purple-700/50 px-6 py-4 rounded-2xl hover:bg-yellow-400 hover:text-purple-950 transition-all shadow-lg">Saiba Mais</button>
-                </div>
-              </div>
-            ))}
+          {/* AQUI ESTÁ A MUDANÇA: bg-black para a moldura e object-contain para não cortar */}
+          <div className="h-64 bg-black/40 relative overflow-hidden flex items-center justify-center p-2">
+            {p.img ? (
+              <img 
+                src={p.img} 
+                alt={p.titulo} 
+                className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500" 
+              />
+            ) : (
+              <div className="text-2xl font-black opacity-20">{p.titulo}</div>
+            )}
+          </div>
+
+          <div className="p-8 flex flex-col flex-grow">
+            <h3 className="text-2xl font-black text-yellow-400 mb-1 uppercase tracking-tighter">{p.titulo}</h3>
+            <p className="text-[10px] font-black uppercase text-purple-400 mb-4">{p.prof === "EM BREVE!" ? p.prof : `Prof. ${p.prof}`}</p>
+            <p className="text-sm text-purple-100/70 mb-8">{p.desc}</p>
+            <button onClick={() => setProjetoSelecionado(p)} className="mt-auto text-[10px] font-black uppercase tracking-widest bg-purple-700/50 px-6 py-4 rounded-2xl hover:bg-yellow-400 hover:text-purple-950 transition-all shadow-lg">Saiba Mais</button>
           </div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* GALERIA */}
       <section id="galeria" className="py-40 bg-[#1F1235] px-8">
