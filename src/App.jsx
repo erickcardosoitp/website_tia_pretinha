@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Analytics } from "@vercel/analytics/react" // <-- Adicione esta linha
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 /**
  * INSTITUTO TIA PRETINHA - VERSÃO ESTRATÉGICA ONG
@@ -409,6 +410,7 @@ function App() {
       </footer>
 
       <Analytics /> {}
+      <SpeedInsights /> {}
     </div>
   )
   
