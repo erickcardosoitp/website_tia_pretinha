@@ -371,8 +371,8 @@ export default function Marketplace() {
                     className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                   >
                     {/* Foto */}
-                    <div className="h-52 bg-gray-100 overflow-hidden flex-shrink-0">
-                      <img
+                    <div className="h-64 bg-gray-100 overflow-hidden flex-shrink-0">
+                        <img
                         src={p.img}
                         alt={p.nome}
                         className="w-full h-full object-cover"
