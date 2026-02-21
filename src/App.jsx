@@ -145,8 +145,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden">
-      
+<div className="min-h-[100dvh] w-full bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden flex flex-col">      
 
 {/* BOTÃO FLUTUANTE - MARKETPLACE */}
 <a
