@@ -384,33 +384,6 @@ function App() {
   )
 }
 
-{/* BOTÃO MARKETPLACE - CÍRCULO BRANCO COM ÍCONE PRETO */}
-<a 
-  href="/marketplace" 
-  target="_blank" 
-  rel="noopener noreferrer"
-  className="fixed bottom-10 right-10 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:scale-110 transition-all z-[250] group"
-  title="Ir para o Marketplace"
->
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    className="h-8 w-8 text-black" 
-    fill="none" 
-    viewBox="0 0 24 24" 
-    stroke="currentColor" 
-    strokeWidth={2.5}
-  >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      d="Status-shopping-cart 3 3H5l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
-    />
-  </svg>
-  
-  {/* TOOLTIP OPCIONAL NO HOVER */}
-  <span className="absolute right-20 bg-black text-white text-[10px] font-black uppercase px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap tracking-widest">
-    Loja Online
-  </span>
-</a>
+
 
 export default App
