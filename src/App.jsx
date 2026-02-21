@@ -146,6 +146,33 @@ function App() {
   return (
     <div className="min-h-screen bg-[#2D1B4D] text-white font-sans selection:bg-yellow-400 selection:text-purple-900 scroll-smooth overflow-x-hidden">
       
+      
+{/* BOTÃO FLUTUANTE - MARKETPLACE */}
+<a
+  href="/marketplace"
+  className="fixed bottom-8 left-8 z-[200] w-16 h-16 bg-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center hover:scale-110 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35)] active:scale-95 transition-all duration-300 group"
+  title="Marketplace Instituto Tia Pretinha"
+>
+  {/* Ícone de carrinho SVG - preto */}
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-7 h-7 text-purple-950 group-hover:scale-110 transition-transform duration-300"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+    />
+  </svg>
+
+  {/* Pulsação sutil de fundo */}
+  <span className="absolute inset-0 rounded-full bg-yellow-400/20 animate-ping opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+</a>
+
       {/* TOAST PIX */}
       <div className={`fixed bottom-10 right-10 z-[300] transition-all duration-500 transform ${showPixToast ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
         <div className="bg-yellow-400 text-purple-950 px-8 py-4 rounded-2xl font-black shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-4">
