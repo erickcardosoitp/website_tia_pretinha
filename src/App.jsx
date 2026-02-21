@@ -75,15 +75,72 @@ function App() {
     setTimeout(() => setShowPixToast(false), 3000);
   }
 
+// --- LISTA DE PROJETOS ATUALIZADA E REVISADA ---
   const projetos = [
-    { id: 1, titulo: "Informática", prof: "Erick", desc: "Capacitação digital.", detalhe: "Ferramentas de produtividade.", img: "/pretina_ti.jpeg" },
-    { id: 2, titulo: "Ballet Clássico", prof: "Ellen", desc: "Expressão artística.", detalhe: "Consciência corporal.", img: "/pretinha_ballet.jpeg" },
-    { id: 3, titulo: "Jiu-Jitsu", prof: "Tico", desc: "Defesa pessoal.", detalhe: "Valores e autoconfiança.", img: "/pretinha_jiujtsu.jpeg" },
-    { id: 4, titulo: "Karatê", prof: "EM BREVE!", desc: "Disciplina mental.", detalhe: "Novas turmas em breve.", img: "/pretinha_jiujtsu.jpeg" },
-    { id: 5, titulo: "Capoeira", prof: "Anderson", desc: "Cultura e esporte.", detalhe: "Herança afro-brasileira.", img: "/pretinha_jiujtsu.jpeg" },
-    { id: 6, titulo: "Futebol", prof: "EM BREVE!", desc: "Integração social.", detalhe: "Trabalho em equipe.", img: "/pretinha_fut.jpeg" },
-    { id: 7, titulo: "Inglês", prof: "Karina", desc: "Novo idioma.", detalhe: "Prática e conversação.", img: "/pretinha_ingles.jpeg" },
-    { id: 8, titulo: "Reforço Escolar", prof: "Érica", desc: "Apoio pedagógico.", detalhe: "Português e Matemática.", img: null }
+    { 
+      id: 1, 
+      titulo: "Informática", 
+      prof: "Erick", 
+      desc: "Capacitação digital.", 
+      detalhe: "Ferramentas de produtividade e introdução ao mundo tech.", 
+      img: "/pretinha_ti.jpeg" // Corrigido de 'pretina' para 'pretinha'
+    },
+    { 
+      id: 2, 
+      titulo: "Ballet Clássico", 
+      prof: "Ellen", 
+      desc: "Expressão artística.", 
+      detalhe: "Desenvolvimento da consciência corporal e disciplina artística.", 
+      img: "/pretinha_ballet.jpeg" 
+    },
+    { 
+      id: 3, 
+      titulo: "Jiu-Jitsu", 
+      prof: "Tico", 
+      desc: "Defesa pessoal.", 
+      detalhe: "Construção de valores, respeito e autoconfiança.", 
+      img: "/pretinha_jiujtsu.jpeg" 
+    },
+    { 
+      id: 4, 
+      titulo: "Danças Contemporâneas", 
+      prof: "Letícia", 
+      desc: "Movimento e criatividade.", 
+      detalhe: "Exploração da linguagem corporal e ritmos modernos.", 
+      img: "/pretinha_danca.jpeg" // Nova imagem adicionada
+    },
+    { 
+      id: 5, 
+      titulo: "Capoeira", 
+      prof: "Anderson", 
+      desc: "Cultura e esporte.", 
+      detalhe: "Preservação da herança afro-brasileira através do movimento.", 
+      img: "/pretinha_jiujtsu.jpeg" 
+    },
+    { 
+      id: 6, 
+      titulo: "Futebol", 
+      prof: "EM BREVE!", 
+      desc: "Integração social.", 
+      detalhe: "Trabalho em equipe e saúde através do esporte.", 
+      img: "/pretinha_fut.jpeg" 
+    },
+    { 
+      id: 7, 
+      titulo: "Inglês", 
+      prof: "Karina", 
+      desc: "Novo idioma.", 
+      detalhe: "Prática dinâmica de conversação e gramática básica.", 
+      img: "/pretinha_ingles.jpeg" 
+    },
+    { 
+      id: 8, 
+      titulo: "Reforço Escolar", 
+      prof: "Érica", 
+      desc: "Apoio pedagógico.", 
+      detalhe: "Auxílio focado em Português e Matemática para o desenvolvimento escolar.", 
+      img: "/pretinha_prevest.jpeg" // Imagem adicionada conforme solicitado
+    }
   ];
 
   return (
