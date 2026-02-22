@@ -231,16 +231,82 @@ function App() {
       </header>
 
       {/* SOBRE NÓS */}
-      <section id="sobre-nos" className="py-40 bg-[#1F1235] px-8 text-center">
-        <div className="max-w-6xl mx-auto reveal transition-all duration-1000 transform translate-y-10 opacity-0">
-          <h2 className="text-5xl md:text-7xl font-black mb-10 uppercase italic">SOBRE NÓS</h2>
-          <p className="text-2xl md:text-4xl text-yellow-400 font-medium leading-tight mb-12 italic max-w-5xl mx-auto">"Aqui também é possível vencer."</p>
-          <div className="h-2 w-24 bg-purple-500 mx-auto rounded-full opacity-30"></div>
-          <p className="mt-12 text-purple-100/80 text-lg max-w-3xl mx-auto leading-relaxed">
-            O Instituto Tia Pretinha é um projeto que nasceu do coração da comunidade para oferecer esporte, cultura e educação para quem mais precisa.
-          </p>
+<section id="sobre-nos" className="py-40 bg-[#1F1235] px-8">
+  <div className="max-w-7xl mx-auto">
+    {/* Título da Seção */}
+    <div className="text-center mb-20 reveal transition-all duration-1000 transform translate-y-10 opacity-0">
+      <h2 className="text-5xl md:text-7xl font-black mb-6 uppercase italic tracking-tighter">SOBRE NÓS</h2>
+      <p className="text-2xl md:text-4xl text-yellow-400 font-medium leading-tight italic max-w-5xl mx-auto">
+        "Aqui também é possível vencer."
+      </p>
+      <div className="h-2 w-24 bg-purple-500 mx-auto mt-8 rounded-full opacity-30"></div>
+    </div>
+
+    {/* Bloco Biográfico: Tia Pretinha */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      
+      {/* Imagem com Moldura Estilizada */}
+      <div className="relative reveal transition-all duration-1000 transform -translate-x-10 opacity-0">
+        <div className="absolute -inset-4 border-2 border-yellow-400/30 rounded-[3rem] rotate-3 -z-10"></div>
+        <div className="overflow-hidden rounded-[3rem] shadow-2xl border-4 border-white/10 aspect-[4/5] lg:aspect-auto">
+          <img 
+            src="/tiacelia.jpg" 
+            alt="Célia da Silva Paixão - Tia Pretinha" 
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+          />
         </div>
-      </section>
+        <div className="absolute -bottom-6 -right-6 bg-yellow-400 text-purple-950 p-8 rounded-3xl shadow-xl hidden md:block">
+          <p className="font-black text-2xl uppercase italic leading-none">Célia da Silva Paixão</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 opacity-80">Fundadora & Nutricionista</p>
+        </div>
+      </div>
+
+      {/* Conteúdo de Texto */}
+      <div className="reveal transition-all duration-1000 transform translate-x-10 opacity-0 text-left">
+        <h3 className="text-3xl md:text-5xl font-black text-yellow-400 mb-8 uppercase italic leading-none">
+          <span className="text-white">Tia Pretinha</span>
+        </h3>
+        
+        <div className="space-y-6 text-purple-100/90 text-lg leading-relaxed">
+          <p className="font-bold text-xl text-white italic">
+            Sou mulher periférica, mãe, líder comunitária, empreendedora social e nutricionista.
+          </p>
+          
+          <p>
+            Minha trajetória não nasceu do privilégio — nasceu da luta, da escassez, da dor e, principalmente, da fé e da coragem de não desistir. Cresci vendo de perto a desigualdade e o abandono do poder público, realidades que vivi na pele, morando em fundo de quintal e enfrentando portas fechadas.
+          </p>
+
+          <p>
+            Antes mesmo de fundar o Instituto, eu já ajudava moradores, orientava famílias e lutava por dignidade. Sempre entendi que liderança não é cargo — é serviço. Voltei a estudar já adulta, me formei em Nutrição e transformei minha caminhada em ferramenta de transformação coletiva.
+          </p>
+
+          <p className="bg-white/5 p-6 rounded-2xl border-l-4 border-yellow-400 italic">
+            "Não trabalho por status. Trabalho por vidas. Minha missão é cuidar de pessoas e provar que da periferia também nascem líderes e futuros possíveis."
+          </p>
+
+          <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-yellow-400 text-2xl">⚡</span>
+              <span className="font-black uppercase text-sm tracking-widest">Resistência</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-yellow-400 text-2xl">💜</span>
+              <span className="font-black uppercase text-sm tracking-widest">Afeto em Ação</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Manifesto Final */}
+    <div className="mt-24 text-center reveal transition-all duration-1000 opacity-0">
+       <p className="text-xl md:text-2xl font-light italic text-purple-200">
+         "Sou prova viva de que quando Deus planta um propósito, <br className="hidden md:block"/>
+         nenhuma dificuldade consegue arrancar."
+       </p>
+    </div>
+  </div>
+</section>
 
       {/* PROJETOS - APENAS ESTA SEÇÃO */}
 <section id="projetos" className="py-40 px-8 bg-[#1F1235]">
