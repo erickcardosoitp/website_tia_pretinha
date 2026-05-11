@@ -311,8 +311,8 @@ function SecaoPrestacaoContas() {
                               </td>
                               <td className="px-6 py-3">
                                 <span className="text-purple-100 font-bold">{m.descricao || '—'}</span>
-                                {m.categoria && (
-                                  <span className="text-purple-400/60 font-normal"> | {m.categoria}</span>
+                                {m.detalhes && (
+                                  <span className="text-purple-400/60 font-normal"> | {m.detalhes}</span>
                                 )}
                               </td>
                               <td className={`px-6 py-3 font-black text-right whitespace-nowrap ${isEntrada ? 'text-green-400' : 'text-red-400'}`}>
