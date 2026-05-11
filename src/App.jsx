@@ -18,6 +18,209 @@ const listaDeFotos = Object.values(imagensImportadas)
 
 const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
+const LINK_APRESENTACAO = 'https://docs.google.com/presentation/d/1q9DucrbQLEBK-Sv81TfN8h4CwDIi6H1a/present';
+
+function fmt(valor) {
+  return Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function SecaoPrestacaoContas() {
+  const [dados, setDados] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [abaAtiva, setAbaAtiva] = useState('resumo'); // 'resumo' | 'extrato'
+
+  useEffect(() => {
+    fetch(`${API_BASE}/publico/prestacao-contas?ano=2026&mes=04`)
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null)
+      .then(d => { setDados(d); setCarregando(false); });
+  }, []);
+
+  const receitas = dados?.movimentacoes?.filter(m => m.tipo?.toUpperCase().includes('RECEITA')) ?? [];
+  const despesas = dados?.movimentacoes?.filter(m => m.tipo?.toUpperCase().includes('DESPESA')) ?? [];
+  const catReceita = dados?.porCategoria?.filter(c => c.tipo?.toUpperCase().includes('RECEITA')) ?? [];
+  const catDespesa = dados?.porCategoria?.filter(c => c.tipo?.toUpperCase().includes('DESPESA')) ?? [];
+  const maxDespesa = Math.max(...catDespesa.map(c => c.valor), 1);
+
+  return (
+    <section id="transparencia" className="py-24 bg-[#2D1B4D] px-4 md:px-8 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-6 reveal transition-all duration-1000 opacity-0 translate-y-10">
+          <div>
+            <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">
+              Prestação de<br /><span className="text-yellow-400">Contas</span>
+            </h2>
+            <p className="mt-4 text-purple-200/60 text-base uppercase font-black tracking-widest">
+              Fechamento · Abril / 2026
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href={LINK_APRESENTACAO}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-yellow-400 text-purple-950 px-7 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white transition-colors shadow-xl shadow-yellow-400/20 text-center"
+            >
+              Ver Apresentação Completa →
+            </a>
+          </div>
+        </div>
+
+        {carregando && (
+          <div className="text-center py-20 text-purple-300/50 font-black tracking-widest uppercase">Carregando dados...</div>
+        )}
+
+        {!carregando && dados && (
+          <>
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+              {[
+                { label: 'Alunos Ativos', valor: dados.resumo.alunosAtivos, unidade: 'alunos', cor: 'text-yellow-400' },
+                { label: 'Cursos', valor: dados.resumo.cursosAtivos, unidade: 'ativos', cor: 'text-purple-300' },
+                { label: 'Voluntários', valor: dados.resumo.voluntarios, unidade: 'pessoas', cor: 'text-blue-400' },
+                { label: 'Saldo do Mês', valor: fmt(dados.resumo.saldo), unidade: '', cor: dados.resumo.saldo >= 0 ? 'text-green-400' : 'text-red-400' },
+              ].map((k, i) => (
+                <div key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5 reveal opacity-0 translate-y-10 transition-all duration-700" style={{ transitionDelay: `${i * 80}ms` }}>
+                  <p className="text-purple-200/50 text-xs uppercase font-black tracking-widest mb-2">{k.label}</p>
+                  <p className={`text-2xl md:text-3xl font-black ${k.cor}`}>{k.valor}</p>
+                  {k.unidade && <p className="text-purple-200/30 text-xs mt-1 uppercase font-bold">{k.unidade}</p>}
+                </div>
+              ))}
+            </div>
+
+            {/* Totais Receita / Despesa */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+              <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-green-500/20">
+                <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Entradas</p>
+                <p className="text-3xl font-black text-green-400">{fmt(dados.resumo.totalReceitas)}</p>
+              </div>
+              <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-red-500/20">
+                <p className="text-red-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Saídas</p>
+                <p className="text-3xl font-black text-red-400">{fmt(dados.resumo.totalDespesas)}</p>
+              </div>
+              <div className={`bg-[#1F1235] rounded-[2rem] p-7 border ${dados.resumo.saldo >= 0 ? 'border-yellow-400/30' : 'border-red-500/20'}`}>
+                <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo Final</p>
+                <p className={`text-3xl font-black ${dados.resumo.saldo >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(dados.resumo.saldo)}</p>
+              </div>
+            </div>
+
+            {/* Abas */}
+            <div className="flex gap-3 mb-6">
+              {[['resumo', 'Resumo por Categoria'], ['extrato', 'Extrato Completo']].map(([k, label]) => (
+                <button
+                  key={k}
+                  onClick={() => setAbaAtiva(k)}
+                  className={`px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${abaAtiva === k ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/60 hover:bg-white/10'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Aba Resumo */}
+            {abaAtiva === 'resumo' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Entradas por categoria */}
+                <div className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5">
+                  <h3 className="text-green-400 font-black uppercase tracking-widest text-sm mb-6">Entradas por Categoria</h3>
+                  {catReceita.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
+                  <div className="space-y-3">
+                    {catReceita.map((c, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-purple-100 font-bold truncate max-w-[60%]">{c.categoria || 'Outros'}</span>
+                          <span className="text-green-400 font-black">{fmt(c.valor)}</span>
+                        </div>
+                        <div className="h-1.5 bg-white/5 rounded-full">
+                          <div className="h-full bg-green-500/60 rounded-full" style={{ width: `${(c.valor / (dados.resumo.totalReceitas || 1)) * 100}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Saídas por categoria */}
+                <div className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5">
+                  <h3 className="text-red-400 font-black uppercase tracking-widest text-sm mb-6">Saídas por Categoria</h3>
+                  {catDespesa.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
+                  <div className="space-y-3">
+                    {catDespesa.map((c, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-purple-100 font-bold truncate max-w-[60%]">{c.categoria || 'Outros'}</span>
+                          <span className="text-red-400 font-black">{fmt(c.valor)}</span>
+                        </div>
+                        <div className="h-1.5 bg-white/5 rounded-full">
+                          <div className="h-full bg-red-500/60 rounded-full" style={{ width: `${(c.valor / maxDespesa) * 100}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Aba Extrato */}
+            {abaAtiva === 'extrato' && (
+              <div className="bg-[#1F1235] rounded-[2rem] border border-white/5 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Data</th>
+                        <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Descrição</th>
+                        <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs hidden md:table-cell">Categoria</th>
+                        <th className="text-right px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dados.movimentacoes.map((m, i) => {
+                        const isReceita = m.tipo?.toUpperCase().includes('RECEITA');
+                        return (
+                          <tr key={i} className="border-b border-white/5 hover:bg-white/3 transition-colors">
+                            <td className="px-6 py-3 text-purple-200/60 font-mono text-xs whitespace-nowrap">
+                              {m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
+                            </td>
+                            <td className="px-6 py-3 text-purple-100 font-bold">{m.descricao || '—'}</td>
+                            <td className="px-6 py-3 text-purple-200/50 hidden md:table-cell">{m.categoria || '—'}</td>
+                            <td className={`px-6 py-3 font-black text-right whitespace-nowrap ${isReceita ? 'text-green-400' : 'text-red-400'}`}>
+                              {isReceita ? '+' : '-'}{fmt(m.valor)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {dados.movimentacoes.length === 0 && (
+                        <tr><td colSpan={4} className="px-6 py-10 text-center text-purple-300/40">Nenhuma movimentação registrada em abril/2026</td></tr>
+                      )}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-yellow-400/20 bg-yellow-400/5">
+                        <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
+                        <td className={`px-6 py-4 font-black text-right text-lg ${dados.resumo.saldo >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          {fmt(dados.resumo.saldo)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {!carregando && !dados && (
+          <div className="text-center py-20">
+            <p className="text-purple-300/40 font-black uppercase tracking-widest">Dados indisponíveis no momento</p>
+          </div>
+        )}
+
+      </div>
+    </section>
+  );
+}
+
 function SecaoSuporte() {
   const [tab, setTab] = useState('abrir');
   const [form, setForm] = useState({ nome: '', email: '', telefone: '', nome_aluno: '', assunto: '', mensagem: '' });
@@ -558,28 +761,7 @@ function App() {
       </section>
 
       {/* TRANSPARÊNCIA */}
-      <section id="transparencia" className="py-40 bg-[#2D1B4D] px-8 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto text-center md:text-left">
-          <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-20 gap-8 reveal transition-all duration-1000 opacity-0 translate-y-10">
-            <div>
-              <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">Prestação de <br/><span className="text-yellow-400">Contas</span></h2>
-              <p className="mt-6 text-purple-200/60 max-w-xl text-lg uppercase font-black tracking-widest mx-auto md:mx-0">Transparência total com cada centavo investido no futuro.</p>
-            </div>
-            <div className="bg-yellow-400 text-purple-950 px-8 py-4 rounded-2xl font-black text-2xl animate-pulse shadow-xl shadow-yellow-400/20">
-              EM BREVE!
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 opacity-40 grayscale">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#1F1235] p-10 rounded-[3rem] border border-white/10 shadow-lg reveal transition-all duration-700 opacity-0 translate-y-10">
-                <div className="w-12 h-12 bg-purple-500/20 rounded-full mb-6 flex items-center justify-center text-purple-400">📄</div>
-                <div className="w-full h-4 bg-white/10 rounded-full mb-4"></div>
-                <div className="w-2/3 h-4 bg-white/5 rounded-full"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <SecaoPrestacaoContas />
 
       <SecaoSuporte />
 
