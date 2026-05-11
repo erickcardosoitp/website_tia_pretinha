@@ -156,20 +156,34 @@ function SecaoSuporte() {
             {resultados !== null && resultados.length === 0 && (
               <p className="text-purple-300 text-center py-6">Nenhum chamado encontrado. Verifique o protocolo ou entre em contato pelo WhatsApp.</p>
             )}
-            {resultados?.map(r => {
-              const sc = statusConfig[r.status] ?? { label: r.status, cor: 'bg-purple-600 text-white' };
-              return (
-                <div key={r.protocolo} className="bg-purple-900/40 border border-purple-700 rounded-2xl p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono font-black text-yellow-400 text-sm">{r.protocolo}</span>
-                    <span className={`text-xs font-black px-3 py-1 rounded-full uppercase ${sc.cor}`}>{sc.label}</span>
-                  </div>
-                  <p className="font-black text-white mb-1">{r.titulo}</p>
-                  <p className="text-purple-400 text-xs mb-4">Aberto em {new Date(r.criado_em).toLocaleDateString('pt-BR')}</p>
-                  {r.resumo_ia && <p className="text-purple-200 text-sm leading-relaxed border-t border-purple-700/50 pt-4">{r.resumo_ia}</p>}
-                </div>
-              );
-            })}
+            {resultados?.length > 0 && (
+              <div className="overflow-x-auto rounded-2xl border border-purple-700">
+                <table className="w-full text-sm">
+                  <thead className="bg-purple-900/80">
+                    <tr>
+                      {['Protocolo','Assunto','Tipo','Status','Aberto em','Atualizado em'].map(h => (
+                        <th key={h} className="px-4 py-3 text-left text-purple-300 font-black text-xs uppercase tracking-widest whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resultados.map((r, i) => {
+                      const sc = statusConfig[r.status] ?? { label: r.status, cor: 'bg-purple-600 text-white' };
+                      return (
+                        <tr key={r.protocolo} className={i % 2 === 0 ? 'bg-purple-900/20' : 'bg-purple-900/40'}>
+                          <td className="px-4 py-3 font-mono font-black text-yellow-400 whitespace-nowrap">{r.protocolo}</td>
+                          <td className="px-4 py-3 text-white">{r.titulo}</td>
+                          <td className="px-4 py-3 text-purple-300">{r.tipo}</td>
+                          <td className="px-4 py-3"><span className={`text-xs font-black px-2 py-1 rounded-full uppercase ${sc.cor}`}>{sc.label}</span></td>
+                          <td className="px-4 py-3 text-purple-300 whitespace-nowrap">{new Date(r.criado_em).toLocaleDateString('pt-BR')}</td>
+                          <td className="px-4 py-3 text-purple-300 whitespace-nowrap">{new Date(r.atualizado_em).toLocaleDateString('pt-BR')}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
