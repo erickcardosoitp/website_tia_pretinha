@@ -19,6 +19,7 @@ const listaDeFotos = Object.values(imagensImportadas)
 const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
 const LINK_APRESENTACAO = 'https://drive.google.com/file/d/1EXb3z0h_vGt2mDAJ__9CbDZBzRF8pEXu/view?usp=sharing';
+const ULTIMO_MES_PUBLICADO = '2026-04'; // atualizar ao fechar cada mês
 
 function fmt(valor) {
   return Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -156,7 +157,14 @@ function SecaoPrestacaoContas() {
           <div className="text-center py-20 text-purple-300/50 font-black tracking-widest uppercase">Carregando dados...</div>
         )}
 
-        {!carregando && dados && (
+        {!carregando && mesSelecionado > ULTIMO_MES_PUBLICADO && (
+          <div className="text-center py-24">
+            <p className="text-5xl md:text-7xl font-black uppercase italic text-yellow-400 mb-4">Em Breve</p>
+            <p className="text-purple-200/50 font-black uppercase tracking-widest text-sm">Fechamento ainda não publicado</p>
+          </div>
+        )}
+
+        {!carregando && dados && mesSelecionado <= ULTIMO_MES_PUBLICADO && (
           <>
             {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
@@ -217,7 +225,7 @@ function SecaoPrestacaoContas() {
                           <span className="text-purple-100 font-bold truncate max-w-[60%]">{c.categoria || 'Outros'}</span>
                           <span className="text-green-400 font-black">{fmt(c.valor)}</span>
                         </div>
-                        <div className="h-1.5 bg-white/5 rounded-full">
+                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-green-500/60 rounded-full" style={{ width: `${(c.valor / (dados.resumo.totalReceitas || 1)) * 100}%` }} />
                         </div>
                       </div>
@@ -236,7 +244,7 @@ function SecaoPrestacaoContas() {
                           <span className="text-purple-100 font-bold truncate max-w-[60%]">{c.categoria || 'Outros'}</span>
                           <span className="text-red-400 font-black">{fmt(c.valor)}</span>
                         </div>
-                        <div className="h-1.5 bg-white/5 rounded-full">
+                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-red-500/60 rounded-full" style={{ width: `${(c.valor / maxDespesa) * 100}%` }} />
                         </div>
                       </div>
