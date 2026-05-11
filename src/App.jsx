@@ -36,24 +36,23 @@ function SecaoPrestacaoContas() {
       .then(d => { setDados(d); setCarregando(false); });
   }, []);
 
-  const PALAVRAS_PRIVADAS = ['vale', 'salário', 'salario', 'folha', 'benefício', 'beneficio', 'férias', 'ferias', '13º', '13o', 'rescisão', 'rescisao', 'inss', 'fgts'];
-  const ehPrivado = (texto) => PALAVRAS_PRIVADAS.some(p => (texto ?? '').toLowerCase().includes(p));
+  const CAT_PUBLICAS_ENTRADA = ['doações', 'doacoes', 'doacao', 'doação'];
+  const CAT_PUBLICAS_SAIDA = ['materiais', 'cozinha'];
+
+  const ehEntradaPublica = (cat) => CAT_PUBLICAS_ENTRADA.some(p => (cat ?? '').toLowerCase().includes(p));
+  const ehSaidaPublica = (cat) => CAT_PUBLICAS_SAIDA.some(p => (cat ?? '').toLowerCase().includes(p));
 
   const receitas = dados?.movimentacoes?.filter(m =>
-    m.tipo?.toUpperCase().includes('RECEITA') &&
-    (m.categoria ?? '').toLowerCase().includes('doa')
+    (m.tipo === 'Entrada' || m.tipo === 'Receita') && ehEntradaPublica(m.categoria)
   ) ?? [];
   const despesas = dados?.movimentacoes?.filter(m =>
-    m.tipo?.toUpperCase().includes('DESPESA') &&
-    !ehPrivado(m.categoria) && !ehPrivado(m.descricao)
+    m.tipo === 'Saída' && ehSaidaPublica(m.categoria)
   ) ?? [];
   const catReceita = dados?.porCategoria?.filter(c =>
-    c.tipo?.toUpperCase().includes('RECEITA') &&
-    (c.categoria ?? '').toLowerCase().includes('doa')
+    (c.tipo === 'Entrada' || c.tipo === 'Receita') && ehEntradaPublica(c.categoria)
   ) ?? [];
   const catDespesa = dados?.porCategoria?.filter(c =>
-    c.tipo?.toUpperCase().includes('DESPESA') &&
-    !ehPrivado(c.categoria)
+    c.tipo === 'Saída' && ehSaidaPublica(c.categoria)
   ) ?? [];
   const maxDespesa = Math.max(...catDespesa.map(c => c.valor), 1);
 
