@@ -21,7 +21,6 @@ const API_BASE = 'https://itp.institutotiapretinha.org/api';
 function SecaoSuporte() {
   const [tab, setTab] = useState('abrir');
   const [form, setForm] = useState({ nome: '', email: '', telefone: '', nome_aluno: '', assunto: '', mensagem: '' });
-  const [arquivos, setArquivos] = useState([]);
   const [enviando, setEnviando] = useState(false);
   const [protocolo, setProtocolo] = useState(null);
   const [erroAbrir, setErroAbrir] = useState('');
@@ -41,17 +40,17 @@ function SecaoSuporte() {
     setErroAbrir('');
     setEnviando(true);
     try {
-      const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => v && fd.append(k, v));
-      arquivos.forEach(f => fd.append('arquivos', f));
-      const res = await fetch(`${API_BASE}/chamados/publico`, { method: 'POST', body: fd });
+      const res = await fetch(`${API_BASE}/chamados/publico`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Erro ao enviar');
       setProtocolo(data.protocolo);
       setForm({ nome: '', email: '', telefone: '', nome_aluno: '', assunto: '', mensagem: '' });
-      setArquivos([]);
     } catch (err) {
-      setErroAbrir(err.message);
+      setErroAbrir(err.message === 'Failed to fetch' ? 'Erro de conexão. Verifique sua internet e tente novamente.' : err.message);
     } finally {
       setEnviando(false);
     }
@@ -68,7 +67,7 @@ function SecaoSuporte() {
       if (!res.ok) throw new Error(data.message || 'Erro ao buscar');
       setResultados(data.resultados);
     } catch (err) {
-      setErroBusca(err.message);
+      setErroBusca(err.message === 'Failed to fetch' ? 'Erro de conexão. Verifique sua internet e tente novamente.' : err.message);
     } finally {
       setBuscando(false);
     }
@@ -126,12 +125,7 @@ function SecaoSuporte() {
                 <textarea required rows={4} value={form.mensagem} onChange={e => setForm(p => ({...p, mensagem: e.target.value}))}
                   className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white placeholder-purple-500 focus:outline-none focus:border-yellow-400 resize-none" />
               </div>
-              <div>
-                <label className="block text-sm text-purple-300 mb-1">Anexos <span className="text-purple-500">(máx. 3 arquivos, 5MB cada — JPG, PNG, PDF)</span></label>
-                <input type="file" multiple accept=".jpg,.jpeg,.png,.webp,.pdf" onChange={e => setArquivos(Array.from(e.target.files).slice(0, 3))}
-                  className="w-full text-purple-300 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-800 file:text-yellow-400 file:font-black file:text-xs file:cursor-pointer" />
-                {arquivos.length > 0 && <p className="text-xs text-purple-400 mt-1">{arquivos.length} arquivo(s) selecionado(s)</p>}
-              </div>
+              <p className="text-xs text-purple-400">📎 Caso precise enviar documentos, nossa equipe solicitará via WhatsApp após o contato.</p>
               {erroAbrir && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">{erroAbrir}</p>}
               <button type="submit" disabled={enviando}
                 className="bg-yellow-400 text-purple-950 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
