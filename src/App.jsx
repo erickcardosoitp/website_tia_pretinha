@@ -24,17 +24,27 @@ function fmt(valor) {
   return Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+const MESES_NOME = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
 function SecaoPrestacaoContas() {
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(true);
-  const [abaAtiva, setAbaAtiva] = useState('resumo'); // 'resumo' | 'extrato'
+  const [abaAtiva, setAbaAtiva] = useState('resumo');
+  const [mesSelecionado, setMesSelecionado] = useState('2026-04');
+  const [mesesDisponiveis, setMesesDisponiveis] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/publico/prestacao-contas?ano=2026&mes=04`)
+    const [ano, mes] = mesSelecionado.split('-');
+    setCarregando(true);
+    fetch(`${API_BASE}/publico/prestacao-contas?ano=${ano}&mes=${mes}`)
       .then(r => r.ok ? r.json() : null)
       .catch(() => null)
-      .then(d => { setDados(d); setCarregando(false); });
-  }, []);
+      .then(d => {
+        setDados(d);
+        setCarregando(false);
+        if (d?.porMes) setMesesDisponiveis(d.porMes.filter(pm => pm.receitas > 0 || pm.despesas > 0));
+      });
+  }, [mesSelecionado]);
 
   const ehFuncionarios = (cat) => (cat ?? '').toLowerCase().includes('funcionari');
 
@@ -101,13 +111,13 @@ function SecaoPrestacaoContas() {
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-6 reveal transition-all duration-1000 opacity-0 translate-y-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 reveal transition-all duration-1000 opacity-0 translate-y-10">
           <div>
             <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">
               Prestação de<br /><span className="text-yellow-400">Contas</span>
             </h2>
             <p className="mt-4 text-purple-200/60 text-base uppercase font-black tracking-widest">
-              Fechamento · Abril / 2026
+              Fechamento · {MESES_NOME[parseInt(mesSelecionado.split('-')[1], 10) - 1]} / {mesSelecionado.split('-')[0]}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -121,6 +131,26 @@ function SecaoPrestacaoContas() {
             </a>
           </div>
         </div>
+
+        {/* Filtro de meses */}
+        {mesesDisponiveis.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-10">
+            {mesesDisponiveis.map(pm => {
+                const [ano, mes] = pm.mes.split('-');
+                const label = `${MESES_NOME[parseInt(mes, 10) - 1]}/${ano.slice(2)}`;
+                const ativo = pm.mes === mesSelecionado;
+                return (
+                  <button
+                    key={pm.mes}
+                    onClick={() => setMesSelecionado(pm.mes)}
+                    className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${ativo ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/60 hover:bg-white/10'}`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+          </div>
+        )}
 
         {carregando && (
           <div className="text-center py-20 text-purple-300/50 font-black tracking-widest uppercase">Carregando dados...</div>
