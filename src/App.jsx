@@ -296,9 +296,8 @@ function SecaoPrestacaoContas() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-white/10">
-                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Data</th>
-                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Descrição</th>
-                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs hidden md:table-cell">Categoria</th>
+                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs whitespace-nowrap">Data</th>
+                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Doador / Descrição</th>
                           <th className="text-right px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Valor</th>
                         </tr>
                       </thead>
@@ -310,8 +309,12 @@ function SecaoPrestacaoContas() {
                               <td className="px-6 py-3 text-purple-200/60 font-mono text-xs whitespace-nowrap">
                                 {m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
                               </td>
-                              <td className="px-6 py-3 text-purple-100 font-bold">{m.descricao || '—'}</td>
-                              <td className="px-6 py-3 text-purple-200/50 hidden md:table-cell">{m.categoria || '—'}</td>
+                              <td className="px-6 py-3">
+                                <span className="text-purple-100 font-bold">{m.descricao || '—'}</span>
+                                {m.categoria && (
+                                  <span className="text-purple-400/60 font-normal"> | {m.categoria}</span>
+                                )}
+                              </td>
                               <td className={`px-6 py-3 font-black text-right whitespace-nowrap ${isEntrada ? 'text-green-400' : 'text-red-400'}`}>
                                 {isEntrada ? '+' : '-'}{fmt(m.valor)}
                               </td>
@@ -319,12 +322,12 @@ function SecaoPrestacaoContas() {
                           );
                         })}
                         {linhas.length === 0 && (
-                          <tr><td colSpan={4} className="px-6 py-10 text-center text-purple-300/40">Nenhuma movimentação registrada</td></tr>
+                          <tr><td colSpan={3} className="px-6 py-10 text-center text-purple-300/40">Nenhuma movimentação registrada</td></tr>
                         )}
                       </tbody>
                       <tfoot>
                         <tr className="border-t-2 border-yellow-400/20 bg-yellow-400/5">
-                          <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
+                          <td colSpan={2} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
                           <td className={`px-6 py-4 font-black text-right text-lg ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
                             {fmt(saldoDoacoes)}
                           </td>
