@@ -255,50 +255,86 @@ function SecaoPrestacaoContas() {
             )}
 
             {/* Aba Extrato */}
-            {abaAtiva === 'extrato' && (
-              <div className="bg-[#1F1235] rounded-[2rem] border border-white/5 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-white/10">
-                        <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Data</th>
-                        <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Descrição</th>
-                        <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs hidden md:table-cell">Categoria</th>
-                        <th className="text-right px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Valor</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...receitas, ...despesas].sort((a, b) => (a.data ?? '').localeCompare(b.data ?? '')).map((m, i) => {
-                        const isReceita = m.tipo?.toUpperCase().includes('RECEITA');
-                        return (
-                          <tr key={i} className="border-b border-white/5 hover:bg-white/3 transition-colors">
-                            <td className="px-6 py-3 text-purple-200/60 font-mono text-xs whitespace-nowrap">
-                              {m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
-                            </td>
-                            <td className="px-6 py-3 text-purple-100 font-bold">{m.descricao || '—'}</td>
-                            <td className="px-6 py-3 text-purple-200/50 hidden md:table-cell">{m.categoria || '—'}</td>
-                            <td className={`px-6 py-3 font-black text-right whitespace-nowrap ${isReceita ? 'text-green-400' : 'text-red-400'}`}>
-                              {isReceita ? '+' : '-'}{fmt(m.valor)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {(receitas.length + despesas.length) === 0 && (
-                        <tr><td colSpan={4} className="px-6 py-10 text-center text-purple-300/40">Nenhuma movimentação registrada em abril/2026</td></tr>
-                      )}
-                    </tbody>
-                    <tfoot>
-                      <tr className="border-t-2 border-yellow-400/20 bg-yellow-400/5">
-                        <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
-                        <td className={`px-6 py-4 font-black text-right text-lg ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
-                          {fmt(saldoDoacoes)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
+            {abaAtiva === 'extrato' && (() => {
+              const linhasIndividuais = (dados.movimentacoes ?? [])
+                .filter(m => m.tipo === 'Entrada' || (m.tipo === 'Saída' && !ehFuncionarios(m.categoria)))
+                .sort((a, b) => (b.data ?? '').localeCompare(a.data ?? ''));
+              const linhaFuncionarios = totalFuncionarios > 0
+                ? [{ data: null, descricao: 'Funcionários (consolidado)', categoria: 'Funcionários', tipo: 'Saída', valor: totalFuncionarios }]
+                : [];
+              const linhas = [...linhasIndividuais, ...linhaFuncionarios];
+
+              function exportarCSV() {
+                const mesLabel = `${MESES_NOME[parseInt(mesSelecionado.split('-')[1], 10) - 1]}-${mesSelecionado.split('-')[0]}`;
+                const cabecalho = 'Data;Descrição;Categoria;Tipo;Valor';
+                const rows = linhas.map(m => [
+                  m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—',
+                  `"${(m.descricao ?? '').replace(/"/g, '""')}"`,
+                  `"${(m.categoria ?? '').replace(/"/g, '""')}"`,
+                  m.tipo === 'Entrada' ? 'Entrada' : 'Saída',
+                  Number(m.valor ?? 0).toFixed(2).replace('.', ','),
+                ].join(';'));
+                const csv = '﻿' + [cabecalho, ...rows].join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = `prestacao-contas-${mesLabel}.csv`; a.click();
+                URL.revokeObjectURL(url);
+              }
+
+              return (
+                <div className="bg-[#1F1235] rounded-[2rem] border border-white/5 overflow-hidden">
+                  <div className="flex justify-end px-6 pt-5">
+                    <button
+                      onClick={exportarCSV}
+                      className="bg-yellow-400 text-purple-950 px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white transition-colors"
+                    >
+                      Exportar Excel ↓
+                    </button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10">
+                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Data</th>
+                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Descrição</th>
+                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs hidden md:table-cell">Categoria</th>
+                          <th className="text-right px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Valor</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {linhas.map((m, i) => {
+                          const isEntrada = m.tipo === 'Entrada';
+                          return (
+                            <tr key={i} className="border-b border-white/5 hover:bg-white/3 transition-colors">
+                              <td className="px-6 py-3 text-purple-200/60 font-mono text-xs whitespace-nowrap">
+                                {m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
+                              </td>
+                              <td className="px-6 py-3 text-purple-100 font-bold">{m.descricao || '—'}</td>
+                              <td className="px-6 py-3 text-purple-200/50 hidden md:table-cell">{m.categoria || '—'}</td>
+                              <td className={`px-6 py-3 font-black text-right whitespace-nowrap ${isEntrada ? 'text-green-400' : 'text-red-400'}`}>
+                                {isEntrada ? '+' : '-'}{fmt(m.valor)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {linhas.length === 0 && (
+                          <tr><td colSpan={4} className="px-6 py-10 text-center text-purple-300/40">Nenhuma movimentação registrada</td></tr>
+                        )}
+                      </tbody>
+                      <tfoot>
+                        <tr className="border-t-2 border-yellow-400/20 bg-yellow-400/5">
+                          <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
+                          <td className={`px-6 py-4 font-black text-right text-lg ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                            {fmt(saldoDoacoes)}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </>
         )}
 
