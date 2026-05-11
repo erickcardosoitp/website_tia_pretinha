@@ -18,7 +18,7 @@ const listaDeFotos = Object.values(imagensImportadas)
 
 const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
-const LINK_APRESENTACAO = 'https://docs.google.com/presentation/d/1q9DucrbQLEBK-Sv81TfN8h4CwDIi6H1a/present';
+const LINK_APRESENTACAO = 'https://drive.google.com/file/d/1EXb3z0h_vGt2mDAJ__9CbDZBzRF8pEXu/view?usp=sharing';
 
 function fmt(valor) {
   return Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
