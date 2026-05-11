@@ -199,7 +199,7 @@ function SecaoPrestacaoContas() {
             </div>
 
             {/* Abas */}
-            <div className="flex gap-3 mb-6">
+            <div className="flex flex-wrap gap-2 mb-6">
               {[['resumo', 'Resumo por Categoria'], ['extrato', 'Extrato Completo']].map(([k, label]) => (
                 <button
                   key={k}
@@ -405,7 +405,7 @@ function SecaoSuporte() {
   }
 
   return (
-    <section id="suporte" className="py-32 bg-[#1a0a35] text-white px-8 reveal transition-all duration-1000 opacity-0 translate-y-10">
+    <section id="suporte" className="py-16 md:py-32 bg-[#1a0a35] text-white px-4 md:px-8 reveal transition-all duration-1000 opacity-0 translate-y-10">
       <div className="max-w-2xl mx-auto">
         <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic text-center mb-4">SUPORTE E <span className="text-yellow-400">ATENDIMENTO</span></h2>
         <p className="text-purple-300 text-center mb-10">Abra um chamado ou consulte o status de um atendimento.</p>
@@ -675,8 +675,8 @@ function App() {
 </a>
 
       {/* TOAST PIX */}
-      <div className={`fixed bottom-10 right-10 z-[300] transition-all duration-500 transform ${showPixToast ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
-        <div className="bg-yellow-400 text-purple-950 px-8 py-4 rounded-2xl font-black shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-4">
+      <div className={`fixed bottom-24 right-4 md:bottom-10 md:right-10 z-[300] transition-all duration-500 transform ${showPixToast ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+        <div className="bg-yellow-400 text-purple-950 px-5 py-3 md:px-8 md:py-4 rounded-2xl font-black shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-3">
           <span className="text-2xl">💜</span>
           <div className="flex flex-col">
             <span className="text-xs uppercase tracking-widest opacity-70">Sucesso</span>
@@ -719,19 +719,19 @@ function App() {
       </nav>
 
       {/* HERO */}
-      <header id="inicio" className="relative min-h-screen flex items-center justify-center pt-20 px-8 text-center">
+      <header id="inicio" className="relative min-h-screen flex items-center justify-center pt-20 px-4 md:px-8 text-center">
         <div className="max-w-5xl z-10 reveal transition-all duration-1000 transform translate-y-10 opacity-0">
-          <h1 className="text-5xl md:text-9xl font-black leading-none mb-8 uppercase tracking-tighter italic">Instituto <br/><span className="text-yellow-400">Tia Pretinha</span></h1>
-          <p className="text-xl md:text-2xl text-purple-100 max-w-4xl mx-auto font-light mb-12 italic">"Transformando vidas com afeto e ação."</p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <a href="#matricule-se" className="bg-yellow-400 text-purple-900 px-12 py-5 rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-xl shadow-yellow-400/10">MATRICULE-SE</a>
-            <a href="#projetos" className="bg-purple-600/30 border-2 border-white/20 px-12 py-5 rounded-2xl font-black text-lg hover:bg-purple-600/50 transition-all">PROJETOS</a>
+          <h1 className="text-4xl sm:text-5xl md:text-9xl font-black leading-none mb-8 uppercase tracking-tighter italic">Instituto <br/><span className="text-yellow-400">Tia Pretinha</span></h1>
+          <p className="text-lg md:text-2xl text-purple-100 max-w-4xl mx-auto font-light mb-12 italic">"Transformando vidas com afeto e ação."</p>
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
+            <a href="#matricule-se" className="bg-yellow-400 text-purple-900 px-8 sm:px-12 py-5 rounded-2xl font-black text-base md:text-lg hover:scale-105 transition-all shadow-xl shadow-yellow-400/10">MATRICULE-SE</a>
+            <a href="#projetos" className="bg-purple-600/30 border-2 border-white/20 px-8 sm:px-12 py-5 rounded-2xl font-black text-base md:text-lg hover:bg-purple-600/50 transition-all">PROJETOS</a>
           </div>
         </div>
       </header>
 
       {/* SOBRE NÓS */}
-<section id="sobre-nos" className="py-40 bg-[#1F1235] px-8">
+<section id="sobre-nos" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
   <div className="max-w-7xl mx-auto">
     {/* Título da Seção */}
     <div className="text-center mb-20 reveal transition-all duration-1000 transform translate-y-10 opacity-0">
@@ -809,7 +809,7 @@ function App() {
 </section>
 
       {/* PROJETOS - APENAS ESTA SEÇÃO */}
-<section id="projetos" className="py-40 px-8 bg-[#1F1235]">
+<section id="projetos" className="py-20 md:py-40 px-4 md:px-8 bg-[#1F1235]">
   <div className="max-w-7xl mx-auto">
     <h2 className="text-5xl font-black mb-20 text-center uppercase italic reveal opacity-0 translate-y-10 transition-all duration-700">
       PROJETOS
@@ -854,7 +854,7 @@ function App() {
 </section>
 
       {/* GALERIA */}
-      <section id="galeria" className="py-40 bg-[#1F1235] px-8">
+      <section id="galeria" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
         <div className="max-w-6xl mx-auto text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
           <h2 className="text-5xl font-black mb-20 uppercase italic tracking-tighter">GALERIA</h2>
           {fotosGaleria.length > 0 ? (
@@ -894,13 +894,13 @@ function App() {
       <SecaoSuporte />
 
       {/* MATRICULE-SE */}
-      <section id="matricule-se" className="py-32 bg-yellow-400 text-purple-950 px-8 text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
-        <h2 className="text-5xl md:text-8xl font-black mb-10 uppercase tracking-tighter italic text-center">MATRICULE-SE</h2>
-        <a href="https://itp.institutotiapretinha.org/inscricao" className="inline-block bg-purple-950 text-white px-16 py-6 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase">Inscrição Online</a>
+      <section id="matricule-se" className="py-20 md:py-32 bg-yellow-400 text-purple-950 px-4 md:px-8 text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
+        <h2 className="text-4xl md:text-8xl font-black mb-10 uppercase tracking-tighter italic text-center">MATRICULE-SE</h2>
+        <a href="https://itp.institutotiapretinha.org/inscricao" className="inline-block bg-purple-950 text-white px-8 md:px-16 py-5 md:py-6 rounded-3xl font-black text-lg md:text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase">Inscrição Online</a>
       </section>
 
       {/* AJUDA / PIX */}
-      <section id="como-ajudar" className="py-40 px-8 bg-[#2D1B4D]">
+      <section id="como-ajudar" className="py-20 md:py-40 px-4 md:px-8 bg-[#2D1B4D]">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-5xl font-black mb-20 uppercase tracking-tighter text-yellow-400 reveal transition-all duration-700 opacity-0 translate-y-10">COMO AJUDAR</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
@@ -927,7 +927,7 @@ function App() {
       </section>
 
       {/* CONTATO */}
-      <section id="contato" className="py-40 bg-[#1F1235] px-8">
+      <section id="contato" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
         <div className="max-w-5xl mx-auto text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
           <h2 className="text-5xl font-black mb-16 uppercase italic tracking-tighter">CONTATO</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -941,7 +941,7 @@ function App() {
       {/* MODAL PROJETOS */}
       {projetoSelecionado && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-purple-950/98 backdrop-blur-xl">
-          <div className="bg-white text-purple-950 max-w-2xl w-full rounded-[4rem] p-12 relative shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+          <div className="bg-white text-purple-950 max-w-2xl w-full rounded-[2rem] md:rounded-[4rem] p-6 md:p-12 relative shadow-[0_0_100px_rgba(0,0,0,0.5)]">
             <button onClick={() => setProjetoSelecionado(null)} className="absolute top-8 right-10 text-3xl font-black">✕</button>
             <h3 className="text-4xl font-black uppercase mb-6 tracking-tighter">{projetoSelecionado.titulo}</h3>
             <p className="text-xl text-slate-700 mb-10 leading-relaxed font-light italic">"{projetoSelecionado.detalhe}"</p>
@@ -951,8 +951,9 @@ function App() {
       )}
 
       {/* FOOTER */}
-      <footer className="bg-black py-16 px-8 text-center border-t border-white/5">
+      <footer className="bg-black py-16 px-4 md:px-8 text-center border-t border-white/5">
         <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em]">© 2025 Instituto Tia Pretinha • Todos os direitos reservados</p>
+        <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-2">CNPJ 11.759.851/0001-39</p>
         <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6 italic">Arquitetura Digital por Erick Gonçalves Cardoso</p>
       </footer>
 
