@@ -16,6 +16,167 @@ const listaDeFotos = Object.values(imagensImportadas)
   .map((mod) => mod.default)
   .sort((a, b) => a.localeCompare(b));
 
+const API_BASE = 'https://itp.institutotiapretinha.org/api';
+
+function SecaoSuporte() {
+  const [tab, setTab] = useState('abrir');
+  const [form, setForm] = useState({ nome: '', email: '', telefone: '', nome_aluno: '', assunto: '', mensagem: '' });
+  const [arquivos, setArquivos] = useState([]);
+  const [enviando, setEnviando] = useState(false);
+  const [protocolo, setProtocolo] = useState(null);
+  const [erroAbrir, setErroAbrir] = useState('');
+  const [busca, setBusca] = useState('');
+  const [buscando, setBuscando] = useState(false);
+  const [resultados, setResultados] = useState(null);
+  const [erroBusca, setErroBusca] = useState('');
+
+  const statusConfig = {
+    aberto:       { label: 'Aberto',        cor: 'bg-yellow-400 text-yellow-900' },
+    em_andamento: { label: 'Em andamento',  cor: 'bg-blue-500 text-white' },
+    resolvido:    { label: 'Resolvido',     cor: 'bg-green-500 text-white' },
+  };
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErroAbrir('');
+    setEnviando(true);
+    try {
+      const fd = new FormData();
+      Object.entries(form).forEach(([k, v]) => v && fd.append(k, v));
+      arquivos.forEach(f => fd.append('arquivos', f));
+      const res = await fetch(`${API_BASE}/chamados/publico`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Erro ao enviar');
+      setProtocolo(data.protocolo);
+      setForm({ nome: '', email: '', telefone: '', nome_aluno: '', assunto: '', mensagem: '' });
+      setArquivos([]);
+    } catch (err) {
+      setErroAbrir(err.message);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function handleBuscar(e) {
+    e.preventDefault();
+    setErroBusca('');
+    setResultados(null);
+    setBuscando(true);
+    try {
+      const res = await fetch(`${API_BASE}/chamados/publico/consultar?q=${encodeURIComponent(busca)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Erro ao buscar');
+      setResultados(data.resultados);
+    } catch (err) {
+      setErroBusca(err.message);
+    } finally {
+      setBuscando(false);
+    }
+  }
+
+  return (
+    <section id="suporte" className="py-32 bg-[#1a0a35] text-white px-8 reveal transition-all duration-1000 opacity-0 translate-y-10">
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic text-center mb-4">SUPORTE E <span className="text-yellow-400">ATENDIMENTO</span></h2>
+        <p className="text-purple-300 text-center mb-10">Abra um chamado ou consulte o status de um atendimento.</p>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-8">
+          {[['abrir','Abrir Chamado'],['consultar','Consultar Chamado']].map(([id, label]) => (
+            <button key={id} onClick={() => { setTab(id); setProtocolo(null); setResultados(null); setErroAbrir(''); setErroBusca(''); }}
+              className={`flex-1 py-3 rounded-xl font-black text-sm uppercase tracking-widest transition-all ${tab === id ? 'bg-yellow-400 text-purple-950' : 'bg-purple-900/50 text-purple-300 hover:bg-purple-800/50'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Abrir Chamado */}
+        {tab === 'abrir' && (
+          protocolo ? (
+            <div className="bg-green-500/20 border border-green-400 rounded-2xl p-8 text-center">
+              <p className="text-2xl font-black text-green-400 mb-2">Chamado aberto!</p>
+              <p className="text-lg font-mono font-black text-white mb-3">{protocolo}</p>
+              <p className="text-purple-300 text-sm">Guarde este protocolo para consultas. Nossa equipe entrará em contato pelo WhatsApp.</p>
+              <button onClick={() => setProtocolo(null)} className="mt-6 bg-yellow-400 text-purple-950 px-8 py-3 rounded-xl font-black text-sm uppercase">Abrir novo chamado</button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {[
+                { key: 'nome', label: 'Nome completo', type: 'text', required: true },
+                { key: 'email', label: 'E-mail', type: 'email', required: true },
+                { key: 'telefone', label: 'Telefone / WhatsApp', type: 'tel', required: true },
+                { key: 'nome_aluno', label: 'Nome do aluno (se aplicável)', type: 'text', required: false },
+              ].map(({ key, label, type, required }) => (
+                <div key={key}>
+                  <label className="block text-sm text-purple-300 mb-1">{label}{required && <span className="text-yellow-400">*</span>}</label>
+                  <input type={type} required={required} value={form[key]} onChange={e => setForm(p => ({...p, [key]: e.target.value}))}
+                    className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white placeholder-purple-500 focus:outline-none focus:border-yellow-400" />
+                </div>
+              ))}
+              <div>
+                <label className="block text-sm text-purple-300 mb-1">Assunto<span className="text-yellow-400">*</span></label>
+                <select required value={form.assunto} onChange={e => setForm(p => ({...p, assunto: e.target.value}))}
+                  className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-400">
+                  <option value="">Selecione...</option>
+                  {['Matrícula','Financeiro','Acadêmico','Dúvida Geral','Suporte','Outro'].map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-purple-300 mb-1">Mensagem<span className="text-yellow-400">*</span></label>
+                <textarea required rows={4} value={form.mensagem} onChange={e => setForm(p => ({...p, mensagem: e.target.value}))}
+                  className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white placeholder-purple-500 focus:outline-none focus:border-yellow-400 resize-none" />
+              </div>
+              <div>
+                <label className="block text-sm text-purple-300 mb-1">Anexos <span className="text-purple-500">(máx. 3 arquivos, 5MB cada — JPG, PNG, PDF)</span></label>
+                <input type="file" multiple accept=".jpg,.jpeg,.png,.webp,.pdf" onChange={e => setArquivos(Array.from(e.target.files).slice(0, 3))}
+                  className="w-full text-purple-300 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-800 file:text-yellow-400 file:font-black file:text-xs file:cursor-pointer" />
+                {arquivos.length > 0 && <p className="text-xs text-purple-400 mt-1">{arquivos.length} arquivo(s) selecionado(s)</p>}
+              </div>
+              {erroAbrir && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">{erroAbrir}</p>}
+              <button type="submit" disabled={enviando}
+                className="bg-yellow-400 text-purple-950 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                {enviando ? 'Enviando...' : 'Enviar chamado'}
+              </button>
+            </form>
+          )
+        )}
+
+        {/* Tab Consultar Chamado */}
+        {tab === 'consultar' && (
+          <div className="flex flex-col gap-6">
+            <form onSubmit={handleBuscar} className="flex gap-3">
+              <input type="text" value={busca} onChange={e => setBusca(e.target.value)} placeholder="Protocolo (ITP-XXXXXX-XXX) ou seu nome"
+                className="flex-1 bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white placeholder-purple-500 focus:outline-none focus:border-yellow-400" />
+              <button type="submit" disabled={buscando || busca.trim().length < 3}
+                className="bg-yellow-400 text-purple-950 px-6 py-3 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50">
+                {buscando ? '...' : 'Buscar'}
+              </button>
+            </form>
+            {erroBusca && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">{erroBusca}</p>}
+            {resultados !== null && resultados.length === 0 && (
+              <p className="text-purple-300 text-center py-6">Nenhum chamado encontrado. Verifique o protocolo ou entre em contato pelo WhatsApp.</p>
+            )}
+            {resultados?.map(r => {
+              const sc = statusConfig[r.status] ?? { label: r.status, cor: 'bg-purple-600 text-white' };
+              return (
+                <div key={r.protocolo} className="bg-purple-900/40 border border-purple-700 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono font-black text-yellow-400 text-sm">{r.protocolo}</span>
+                    <span className={`text-xs font-black px-3 py-1 rounded-full uppercase ${sc.cor}`}>{sc.label}</span>
+                  </div>
+                  <p className="font-black text-white mb-1">{r.titulo}</p>
+                  <p className="text-purple-400 text-xs mb-4">Aberto em {new Date(r.criado_em).toLocaleDateString('pt-BR')}</p>
+                  {r.resumo_ia && <p className="text-purple-200 text-sm leading-relaxed border-t border-purple-700/50 pt-4">{r.resumo_ia}</p>}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function App() {
   const [activeSection, setActiveSection] = useState('inicio');
   const [projetoSelecionado, setProjetoSelecionado] = useState(null);
@@ -49,7 +210,7 @@ function App() {
   useEffect(() => {
     const nomesSessoes = {
       'inicio': 'Início', 'sobre-nos': 'Sobre Nós', 'projetos': 'Projetos',
-      'galeria': 'Galeria', 'transparencia': 'Transparência', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
+      'galeria': 'Galeria', 'transparencia': 'Transparência', 'suporte': 'Suporte', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
     };
     document.title = `Instituto Tia Pretinha | ${nomesSessoes[activeSection] || 'Bem-vindo'}`;
   }, [activeSection]);
@@ -57,7 +218,7 @@ function App() {
   // --- DETECÇÃO DE SCROLL ---
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'matricule-se', 'como-ajudar', 'contato'];
+      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'contato'];
       const scrollPosition = window.scrollY + 250;
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -196,7 +357,7 @@ function App() {
           />
           
           <div className="flex items-center gap-5 overflow-x-auto lg:overflow-visible no-scrollbar py-2 max-w-[60%] md:max-w-none">
-            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
+            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
               <a 
                 key={item} 
                 href={`#${item}`} 
@@ -411,6 +572,8 @@ function App() {
           </div>
         </div>
       </section>
+
+      <SecaoSuporte />
 
       {/* MATRICULE-SE */}
       <section id="matricule-se" className="py-32 bg-yellow-400 text-purple-950 px-8 text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
