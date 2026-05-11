@@ -16,7 +16,7 @@ const listaDeFotos = Object.values(imagensImportadas)
   .map((mod) => mod.default)
   .sort((a, b) => a.localeCompare(b));
 
-const API_BASE = 'https://itp.institutotiapretinha.org/api';
+const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
 function SecaoSuporte() {
   const [tab, setTab] = useState('abrir');
