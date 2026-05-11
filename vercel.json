@@ -1,6 +1,13 @@
 {
   "buildCommand": "vite build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/matricula",
+      "destination": "https://itp.institutotiapretinha.org/inscricao",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
