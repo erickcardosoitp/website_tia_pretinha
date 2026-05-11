@@ -310,10 +310,17 @@ function SecaoPrestacaoContas() {
                                 {m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
                               </td>
                               <td className="px-6 py-3">
-                                <span className="text-purple-100 font-bold">{m.descricao || '—'}</span>
-                                {m.detalhes && (
-                                  <span className="text-purple-400/60 font-normal"> | {m.detalhes}</span>
-                                )}
+                                {(() => {
+                                  const ehDoacao = (m.categoria ?? '').toLowerCase().includes('doa');
+                                  const nome = ehDoacao ? 'Contribuição Voluntária' : (m.descricao || '—');
+                                  const detalhe = ehDoacao ? null : m.detalhes;
+                                  return (
+                                    <>
+                                      <span className="text-purple-100 font-bold">{nome}</span>
+                                      {detalhe && <span className="text-purple-400/60 font-normal"> | {detalhe}</span>}
+                                    </>
+                                  );
+                                })()}
                               </td>
                               <td className={`px-6 py-3 font-black text-right whitespace-nowrap ${isEntrada ? 'text-green-400' : 'text-red-400'}`}>
                                 {isEntrada ? '+' : '-'}{fmt(m.valor)}
