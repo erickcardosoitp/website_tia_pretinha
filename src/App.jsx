@@ -36,11 +36,30 @@ function SecaoPrestacaoContas() {
       .then(d => { setDados(d); setCarregando(false); });
   }, []);
 
-  const receitas = dados?.movimentacoes?.filter(m => m.tipo?.toUpperCase().includes('RECEITA')) ?? [];
-  const despesas = dados?.movimentacoes?.filter(m => m.tipo?.toUpperCase().includes('DESPESA')) ?? [];
-  const catReceita = dados?.porCategoria?.filter(c => c.tipo?.toUpperCase().includes('RECEITA')) ?? [];
-  const catDespesa = dados?.porCategoria?.filter(c => c.tipo?.toUpperCase().includes('DESPESA')) ?? [];
+  const PALAVRAS_PRIVADAS = ['vale', 'salário', 'salario', 'folha', 'benefício', 'beneficio', 'férias', 'ferias', '13º', '13o', 'rescisão', 'rescisao', 'inss', 'fgts'];
+  const ehPrivado = (texto) => PALAVRAS_PRIVADAS.some(p => (texto ?? '').toLowerCase().includes(p));
+
+  const receitas = dados?.movimentacoes?.filter(m =>
+    m.tipo?.toUpperCase().includes('RECEITA') &&
+    (m.categoria ?? '').toLowerCase().includes('doa')
+  ) ?? [];
+  const despesas = dados?.movimentacoes?.filter(m =>
+    m.tipo?.toUpperCase().includes('DESPESA') &&
+    !ehPrivado(m.categoria) && !ehPrivado(m.descricao)
+  ) ?? [];
+  const catReceita = dados?.porCategoria?.filter(c =>
+    c.tipo?.toUpperCase().includes('RECEITA') &&
+    (c.categoria ?? '').toLowerCase().includes('doa')
+  ) ?? [];
+  const catDespesa = dados?.porCategoria?.filter(c =>
+    c.tipo?.toUpperCase().includes('DESPESA') &&
+    !ehPrivado(c.categoria)
+  ) ?? [];
   const maxDespesa = Math.max(...catDespesa.map(c => c.valor), 1);
+
+  const totalDoacoes = receitas.reduce((s, m) => s + Number(m.valor ?? 0), 0);
+  const totalGasto = despesas.reduce((s, m) => s + Number(m.valor ?? 0), 0);
+  const saldoDoacoes = totalDoacoes - totalGasto;
 
   return (
     <section id="transparencia" className="py-24 bg-[#2D1B4D] px-4 md:px-8 relative overflow-hidden">
@@ -93,16 +112,16 @@ function SecaoPrestacaoContas() {
             {/* Totais Receita / Despesa */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
               <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-green-500/20">
-                <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Entradas</p>
-                <p className="text-3xl font-black text-green-400">{fmt(dados.resumo.totalReceitas)}</p>
+                <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Doações</p>
+                <p className="text-3xl font-black text-green-400">{fmt(totalDoacoes)}</p>
               </div>
               <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-red-500/20">
-                <p className="text-red-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Saídas</p>
-                <p className="text-3xl font-black text-red-400">{fmt(dados.resumo.totalDespesas)}</p>
+                <p className="text-red-400/70 text-xs uppercase font-black tracking-widest mb-2">Total Gasto</p>
+                <p className="text-3xl font-black text-red-400">{fmt(totalGasto)}</p>
               </div>
-              <div className={`bg-[#1F1235] rounded-[2rem] p-7 border ${dados.resumo.saldo >= 0 ? 'border-yellow-400/30' : 'border-red-500/20'}`}>
-                <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo Final</p>
-                <p className={`text-3xl font-black ${dados.resumo.saldo >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(dados.resumo.saldo)}</p>
+              <div className={`bg-[#1F1235] rounded-[2rem] p-7 border ${saldoDoacoes >= 0 ? 'border-yellow-400/30' : 'border-red-500/20'}`}>
+                <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo das Doações</p>
+                <p className={`text-3xl font-black ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(saldoDoacoes)}</p>
               </div>
             </div>
 
@@ -176,7 +195,7 @@ function SecaoPrestacaoContas() {
                       </tr>
                     </thead>
                     <tbody>
-                      {dados.movimentacoes.map((m, i) => {
+                      {[...receitas, ...despesas].sort((a, b) => (a.data ?? '').localeCompare(b.data ?? '')).map((m, i) => {
                         const isReceita = m.tipo?.toUpperCase().includes('RECEITA');
                         return (
                           <tr key={i} className="border-b border-white/5 hover:bg-white/3 transition-colors">
@@ -191,15 +210,15 @@ function SecaoPrestacaoContas() {
                           </tr>
                         );
                       })}
-                      {dados.movimentacoes.length === 0 && (
+                      {(receitas.length + despesas.length) === 0 && (
                         <tr><td colSpan={4} className="px-6 py-10 text-center text-purple-300/40">Nenhuma movimentação registrada em abril/2026</td></tr>
                       )}
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 border-yellow-400/20 bg-yellow-400/5">
-                        <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
-                        <td className={`px-6 py-4 font-black text-right text-lg ${dados.resumo.saldo >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
-                          {fmt(dados.resumo.saldo)}
+                        <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo das Doações</td>
+                        <td className={`px-6 py-4 font-black text-right text-lg ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          {fmt(saldoDoacoes)}
                         </td>
                       </tr>
                     </tfoot>
