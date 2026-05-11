@@ -36,24 +36,41 @@ function SecaoPrestacaoContas() {
       .then(d => { setDados(d); setCarregando(false); });
   }, []);
 
-  const CAT_PUBLICAS_ENTRADA = ['doações', 'doacoes', 'doacao', 'doação'];
-  const CAT_PUBLICAS_SAIDA = ['materiais', 'cozinha'];
+  const ehFuncionarios = (cat) => (cat ?? '').toLowerCase().includes('funcionari');
 
-  const ehEntradaPublica = (cat) => CAT_PUBLICAS_ENTRADA.some(p => (cat ?? '').toLowerCase().includes(p));
-  const ehSaidaPublica = (cat) => CAT_PUBLICAS_SAIDA.some(p => (cat ?? '').toLowerCase().includes(p));
-
+  // Entradas: tudo que entrou
   const receitas = dados?.movimentacoes?.filter(m =>
-    (m.tipo === 'Entrada' || m.tipo === 'Receita') && ehEntradaPublica(m.categoria)
+    m.tipo === 'Entrada' || m.tipo === 'Receita'
   ) ?? [];
-  const despesas = dados?.movimentacoes?.filter(m =>
-    m.tipo === 'Saída' && ehSaidaPublica(m.categoria)
+
+  // Saídas detalhadas: tudo exceto funcionários (dados pessoais)
+  const despesasDetalhe = dados?.movimentacoes?.filter(m =>
+    m.tipo === 'Saída' && !ehFuncionarios(m.categoria)
   ) ?? [];
+
+  // Saídas funcionários: consolidado (sem nomes individuais)
+  const totalFuncionarios = (dados?.movimentacoes ?? [])
+    .filter(m => m.tipo === 'Saída' && ehFuncionarios(m.categoria))
+    .reduce((s, m) => s + Number(m.valor ?? 0), 0);
+
+  const despesas = [...despesasDetalhe, ...(totalFuncionarios > 0 ? [{ descricao: 'Funcionários (consolidado)', categoria: 'Funcionários', valor: totalFuncionarios, tipo: 'Saída', data: null }] : [])];
+
+  // Categorias para resumo
   const catReceita = dados?.porCategoria?.filter(c =>
-    (c.tipo === 'Entrada' || c.tipo === 'Receita') && ehEntradaPublica(c.categoria)
+    c.tipo === 'Entrada' || c.tipo === 'Receita'
   ) ?? [];
-  const catDespesa = dados?.porCategoria?.filter(c =>
-    c.tipo === 'Saída' && ehSaidaPublica(c.categoria)
+  const catDespesaDetalhe = dados?.porCategoria?.filter(c =>
+    c.tipo === 'Saída' && !ehFuncionarios(c.categoria)
   ) ?? [];
+  const catFuncionarios = dados?.porCategoria?.filter(c =>
+    c.tipo === 'Saída' && ehFuncionarios(c.categoria)
+  ) ?? [];
+  const totalCatFuncionarios = catFuncionarios.reduce((s, c) => s + Number(c.valor ?? 0), 0);
+  const catDespesa = [
+    ...catDespesaDetalhe,
+    ...(totalCatFuncionarios > 0 ? [{ categoria: 'Funcionários (consolidado)', tipo: 'Saída', valor: totalCatFuncionarios }] : []),
+  ];
+
   const maxDespesa = Math.max(...catDespesa.map(c => c.valor), 1);
 
   const totalDoacoes = receitas.reduce((s, m) => s + Number(m.valor ?? 0), 0);
@@ -111,7 +128,7 @@ function SecaoPrestacaoContas() {
             {/* Totais Receita / Despesa */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
               <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-green-500/20">
-                <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Doações</p>
+                <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Entradas</p>
                 <p className="text-3xl font-black text-green-400">{fmt(totalDoacoes)}</p>
               </div>
               <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-red-500/20">
@@ -119,7 +136,7 @@ function SecaoPrestacaoContas() {
                 <p className="text-3xl font-black text-red-400">{fmt(totalGasto)}</p>
               </div>
               <div className={`bg-[#1F1235] rounded-[2rem] p-7 border ${saldoDoacoes >= 0 ? 'border-yellow-400/30' : 'border-red-500/20'}`}>
-                <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo das Doações</p>
+                <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo do Mês</p>
                 <p className={`text-3xl font-black ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(saldoDoacoes)}</p>
               </div>
             </div>
@@ -215,7 +232,7 @@ function SecaoPrestacaoContas() {
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 border-yellow-400/20 bg-yellow-400/5">
-                        <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo das Doações</td>
+                        <td colSpan={3} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
                         <td className={`px-6 py-4 font-black text-right text-lg ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
                           {fmt(saldoDoacoes)}
                         </td>
