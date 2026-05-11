@@ -46,9 +46,10 @@ function SecaoPrestacaoContas() {
       return acc;
     }, {})).sort((a, b) => b.valor - a.valor);
 
-  // Entradas: tudo que entrou, agrupado por categoria
+  // Entradas: só tipo "Entrada" (dinheiro real recebido)
+  // tipo "Receita" = recuperação de adiantamento/folha = contábil interno, não entra no DRE público
   const receitas = agrupar(
-    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Entrada' || m.tipo === 'Receita'),
+    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Entrada'),
     m => m.categoria,
     m => m.valor
   );
@@ -70,9 +71,9 @@ function SecaoPrestacaoContas() {
     ...(totalFuncionarios > 0 ? [{ descricao: 'Funcionários (consolidado)', categoria: 'Funcionários', valor: totalFuncionarios, tipo: 'Saída', data: null }] : []),
   ];
 
-  // Categorias para resumo (agrupadas)
+  // Categorias para resumo (agrupadas) — só "Entrada" real
   const catReceita = agrupar(
-    (dados?.porCategoria ?? []).filter(c => c.tipo === 'Entrada' || c.tipo === 'Receita'),
+    (dados?.porCategoria ?? []).filter(c => c.tipo === 'Entrada'),
     c => c.categoria,
     c => c.valor
   );
@@ -133,7 +134,7 @@ function SecaoPrestacaoContas() {
                 { label: 'Alunos Ativos', valor: dados.resumo.alunosAtivos, unidade: 'alunos', cor: 'text-yellow-400' },
                 { label: 'Cursos', valor: dados.resumo.cursosAtivos, unidade: 'ativos', cor: 'text-purple-300' },
                 { label: 'Voluntários', valor: dados.resumo.voluntarios, unidade: 'pessoas', cor: 'text-blue-400' },
-                { label: 'Saldo do Mês', valor: fmt(dados.resumo.saldo), unidade: '', cor: dados.resumo.saldo >= 0 ? 'text-green-400' : 'text-red-400' },
+                { label: 'Saldo do Mês', valor: fmt(saldoDoacoes), unidade: '', cor: saldoDoacoes >= 0 ? 'text-green-400' : 'text-red-400' },
               ].map((k, i) => (
                 <div key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5 reveal opacity-0 translate-y-10 transition-all duration-700" style={{ transitionDelay: `${i * 80}ms` }}>
                   <p className="text-purple-200/50 text-xs uppercase font-black tracking-widest mb-2">{k.label}</p>
