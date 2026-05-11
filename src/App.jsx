@@ -38,38 +38,56 @@ function SecaoPrestacaoContas() {
 
   const ehFuncionarios = (cat) => (cat ?? '').toLowerCase().includes('funcionari');
 
-  // Entradas: tudo que entrou
-  const receitas = dados?.movimentacoes?.filter(m =>
-    m.tipo === 'Entrada' || m.tipo === 'Receita'
-  ) ?? [];
+  const agrupar = (lista, keyFn, valFn) =>
+    Object.values(lista.reduce((acc, item) => {
+      const k = keyFn(item);
+      acc[k] = acc[k] ?? { ...item, valor: 0 };
+      acc[k].valor += Number(valFn(item) ?? 0);
+      return acc;
+    }, {})).sort((a, b) => b.valor - a.valor);
 
-  // Saídas detalhadas: tudo exceto funcionários (dados pessoais)
-  const despesasDetalhe = dados?.movimentacoes?.filter(m =>
-    m.tipo === 'Saída' && !ehFuncionarios(m.categoria)
-  ) ?? [];
+  // Entradas: tudo que entrou, agrupado por categoria
+  const receitas = agrupar(
+    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Entrada' || m.tipo === 'Receita'),
+    m => m.categoria,
+    m => m.valor
+  );
 
-  // Saídas funcionários: consolidado (sem nomes individuais)
+  // Saídas detalhadas (sem funcionários), agrupadas por categoria
+  const despesasDetalhe = agrupar(
+    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Saída' && !ehFuncionarios(m.categoria)),
+    m => m.categoria,
+    m => m.valor
+  );
+
+  // Funcionários: consolidado único
   const totalFuncionarios = (dados?.movimentacoes ?? [])
     .filter(m => m.tipo === 'Saída' && ehFuncionarios(m.categoria))
     .reduce((s, m) => s + Number(m.valor ?? 0), 0);
 
-  const despesas = [...despesasDetalhe, ...(totalFuncionarios > 0 ? [{ descricao: 'Funcionários (consolidado)', categoria: 'Funcionários', valor: totalFuncionarios, tipo: 'Saída', data: null }] : [])];
+  const despesas = [
+    ...despesasDetalhe,
+    ...(totalFuncionarios > 0 ? [{ descricao: 'Funcionários (consolidado)', categoria: 'Funcionários', valor: totalFuncionarios, tipo: 'Saída', data: null }] : []),
+  ];
 
-  // Categorias para resumo
-  const catReceita = dados?.porCategoria?.filter(c =>
-    c.tipo === 'Entrada' || c.tipo === 'Receita'
-  ) ?? [];
-  const catDespesaDetalhe = dados?.porCategoria?.filter(c =>
-    c.tipo === 'Saída' && !ehFuncionarios(c.categoria)
-  ) ?? [];
-  const catFuncionarios = dados?.porCategoria?.filter(c =>
-    c.tipo === 'Saída' && ehFuncionarios(c.categoria)
-  ) ?? [];
-  const totalCatFuncionarios = catFuncionarios.reduce((s, c) => s + Number(c.valor ?? 0), 0);
+  // Categorias para resumo (agrupadas)
+  const catReceita = agrupar(
+    (dados?.porCategoria ?? []).filter(c => c.tipo === 'Entrada' || c.tipo === 'Receita'),
+    c => c.categoria,
+    c => c.valor
+  );
+  const catDespesaDetalhe = agrupar(
+    (dados?.porCategoria ?? []).filter(c => c.tipo === 'Saída' && !ehFuncionarios(c.categoria)),
+    c => c.categoria,
+    c => c.valor
+  );
+  const totalCatFuncionarios = (dados?.porCategoria ?? [])
+    .filter(c => c.tipo === 'Saída' && ehFuncionarios(c.categoria))
+    .reduce((s, c) => s + Number(c.valor ?? 0), 0);
   const catDespesa = [
     ...catDespesaDetalhe,
     ...(totalCatFuncionarios > 0 ? [{ categoria: 'Funcionários (consolidado)', tipo: 'Saída', valor: totalCatFuncionarios }] : []),
-  ];
+  ].sort((a, b) => b.valor - a.valor);
 
   const maxDespesa = Math.max(...catDespesa.map(c => c.valor), 1);
 
