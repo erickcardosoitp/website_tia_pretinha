@@ -415,7 +415,7 @@ function App() {
       {/* MATRICULE-SE */}
       <section id="matricule-se" className="py-32 bg-yellow-400 text-purple-950 px-8 text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
         <h2 className="text-5xl md:text-8xl font-black mb-10 uppercase tracking-tighter italic text-center">MATRICULE-SE</h2>
-        <a href="https://forms.gle/wddeiiAL3Fgn8feJ8" target="_blank" rel="noopener noreferrer" className="inline-block bg-purple-950 text-white px-16 py-6 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase">Inscrição Online</a>
+        <a href="https://itp.institutotiapretinha.org/inscricao" className="inline-block bg-purple-950 text-white px-16 py-6 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase">Inscrição Online</a>
       </section>
 
       {/* AJUDA / PIX */}
