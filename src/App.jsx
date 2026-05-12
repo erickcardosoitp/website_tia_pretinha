@@ -260,7 +260,7 @@ function SecaoPrestacaoContas() {
                     <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-4">
                       <img src="/logo_ame.png" alt="Instituto AME" className="h-12 w-auto object-contain flex-shrink-0" />
                       <div>
-                        <p className="text-white font-black text-sm">Instituto Direitos Humanos AME</p>
+                        <p className="text-white font-black text-sm">Instituto AME o Santo Amaro</p>
                         <p className="text-purple-300/60 text-xs mt-1">Semana de quentinhas</p>
                       </div>
                     </div>
