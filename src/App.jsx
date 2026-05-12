@@ -101,17 +101,19 @@ function SecaoPrestacaoContas() {
     }
   };
 
-  const entradasPub = agrupar(
-    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Entrada'),
-    m => categoriaPub(m.categoria, 'Entrada'),
-    m => m.valor
-  );
+  const agruparPub = (lista, tipo) =>
+    Object.entries(
+      lista.filter(m => m.tipo === tipo).reduce((acc, m) => {
+        const k = categoriaPub(m.categoria, tipo);
+        acc[k] = (acc[k] ?? 0) + Number(m.valor ?? 0);
+        return acc;
+      }, {})
+    )
+    .map(([categoria, valor]) => ({ categoria, valor }))
+    .sort((a, b) => b.valor - a.valor);
 
-  const saidasPub = agrupar(
-    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Saída'),
-    m => categoriaPub(m.categoria, 'Saída'),
-    m => m.valor
-  );
+  const entradasPub = agruparPub(dados?.movimentacoes ?? [], 'Entrada');
+  const saidasPub   = agruparPub(dados?.movimentacoes ?? [], 'Saída');
 
   return (
     <section id="transparencia" className="py-24 bg-[#2D1B4D] px-4 md:px-8 relative overflow-hidden">
