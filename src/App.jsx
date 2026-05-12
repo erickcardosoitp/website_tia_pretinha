@@ -89,11 +89,9 @@ function SecaoPrestacaoContas() {
   const categoriaPub = (cat, tipo) => {
     const c = (cat ?? '').toLowerCase();
     if (tipo === 'Entrada') {
-      if (c.includes('doa')) return 'Doações';
       if (c.includes('uniform')) return 'Venda de Uniformes';
       if (c.includes('evento')) return 'Eventos Beneficentes';
-      if (c.includes('celia') || c.includes('célia') || c.includes('material')) return 'Contribuições da Diretoria';
-      return 'Outras Entradas';
+      return 'Doações';
     } else {
       if (c.includes('cozinha')) return 'Alimentação';
       if (c.includes('material') || c.includes('celia') || c.includes('célia')) return 'Material Escolar e Manutenção';
@@ -296,13 +294,17 @@ function SecaoPrestacaoContas() {
               function exportarCSV() {
                 const mesLabel = `${MESES_NOME[parseInt(mesSelecionado.split('-')[1], 10) - 1]}-${mesSelecionado.split('-')[0]}`;
                 const cabecalho = 'Data;Descrição;Categoria;Tipo;Valor';
-                const rows = linhas.map(m => [
-                  m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—',
-                  `"${(m.descricao ?? '').replace(/"/g, '""')}"`,
-                  `"${(m.categoria ?? '').replace(/"/g, '""')}"`,
-                  m.tipo === 'Entrada' ? 'Entrada' : 'Saída',
-                  Number(m.valor ?? 0).toFixed(2).replace('.', ','),
-                ].join(';'));
+                const rows = linhas.map(m => {
+                  const catPub = categoriaPub(m.categoria, m.tipo);
+                  const ehPessoal = m.tipo === 'Entrada' && catPub === 'Doações';
+                  return [
+                    m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—',
+                    `"${ehPessoal ? 'Contribuição Voluntária' : (m.descricao ?? '').replace(/"/g, '""')}"`,
+                    `"${ehPessoal ? 'Doações' : catPub}"`,
+                    m.tipo === 'Entrada' ? 'Entrada' : 'Saída',
+                    Number(m.valor ?? 0).toFixed(2).replace('.', ','),
+                  ].join(';');
+                });
                 const csv = '﻿' + [cabecalho, ...rows].join('\n');
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
