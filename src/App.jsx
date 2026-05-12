@@ -190,6 +190,27 @@ function SecaoPrestacaoContas() {
               ))}
             </div>
 
+            {/* Custo por Beneficiário */}
+            {dados.resumo.totalInvestido > 0 && (
+              <div className="bg-[#1F1235] rounded-[2rem] border border-white/5 p-7 mb-10">
+                <p className="text-purple-300/50 text-xs uppercase font-black tracking-widest mb-5">Custo por Beneficiário</p>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-purple-200/40 text-[10px] uppercase font-black tracking-widest mb-1">Total Investido</p>
+                    <p className="text-xl font-black text-red-400">{fmt(dados.resumo.totalInvestido)}</p>
+                  </div>
+                  <div className="text-center border-x border-white/5">
+                    <p className="text-purple-200/40 text-[10px] uppercase font-black tracking-widest mb-1">Beneficiários</p>
+                    <p className="text-xl font-black text-blue-400">{dados.resumo.beneficiarios}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-purple-200/40 text-[10px] uppercase font-black tracking-widest mb-1">Custo Médio</p>
+                    <p className="text-xl font-black text-purple-300">{fmt(dados.resumo.custoMedio)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Abas */}
             <div className="flex flex-wrap gap-2 mb-6">
               {[['resumo', 'Resumo por Categoria'], ['extrato', 'Extrato Completo']].map(([k, label]) => (
