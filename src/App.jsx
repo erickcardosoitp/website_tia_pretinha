@@ -340,9 +340,11 @@ function SecaoPrestacaoContas() {
                               </td>
                               <td className="px-6 py-3">
                                 {(() => {
-                                  const ehDoacao = (m.categoria ?? '').toLowerCase().includes('doa');
-                                  const nome = ehDoacao ? 'Contribuição Voluntária' : (m.descricao || '—');
-                                  const detalhe = ehDoacao ? null : m.detalhes;
+                                  const catPub = categoriaPub(m.categoria, m.tipo);
+                                  const ehPessoal = m.tipo === 'Entrada' &&
+                                    (catPub === 'Doações' || catPub === 'Contribuições da Diretoria');
+                                  const nome = ehPessoal ? 'Contribuição Voluntária' : (m.descricao || '—');
+                                  const detalhe = ehPessoal ? null : m.detalhes;
                                   return (
                                     <>
                                       <span className="text-purple-100 font-bold">{nome}</span>
