@@ -184,7 +184,7 @@ function SecaoPrestacaoContas() {
               ].map((k, i) => (
                 <div key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5 reveal opacity-0 translate-y-10 transition-all duration-700" style={{ transitionDelay: `${i * 80}ms` }}>
                   <p className="text-purple-200/50 text-xs uppercase font-black tracking-widest mb-2">{k.label}</p>
-                  <p className={`text-2xl md:text-3xl font-black ${k.cor}`}>{k.valor}</p>
+                  <p className={`text-lg md:text-3xl font-black leading-tight break-all ${k.cor}`}>{k.valor}</p>
                   {k.unidade && <p className="text-purple-200/30 text-xs mt-1 uppercase font-bold">{k.unidade}</p>}
                 </div>
               ))}
@@ -192,20 +192,20 @@ function SecaoPrestacaoContas() {
 
             {/* Custo por Beneficiário */}
             {dados.resumo.totalInvestido > 0 && (
-              <div className="bg-[#1F1235] rounded-[2rem] border border-white/5 p-7 mb-10">
+              <div className="bg-[#1F1235] rounded-[2rem] border border-white/5 p-6 md:p-7 mb-10">
                 <p className="text-purple-300/50 text-xs uppercase font-black tracking-widest mb-5">Custo por Beneficiário</p>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <div className="text-center">
-                    <p className="text-purple-200/40 text-[10px] uppercase font-black tracking-widest mb-1">Total Investido</p>
-                    <p className="text-xl font-black text-red-400">{fmt(dados.resumo.totalInvestido)}</p>
+                    <p className="text-purple-200/40 text-[9px] md:text-[10px] uppercase font-black tracking-tight md:tracking-widest mb-1 leading-tight">Total Investido</p>
+                    <p className="text-base md:text-xl font-black text-red-400 break-all">{fmt(dados.resumo.totalInvestido)}</p>
                   </div>
                   <div className="text-center border-x border-white/5">
-                    <p className="text-purple-200/40 text-[10px] uppercase font-black tracking-widest mb-1">Beneficiários</p>
-                    <p className="text-xl font-black text-blue-400">{dados.resumo.beneficiarios}</p>
+                    <p className="text-purple-200/40 text-[9px] md:text-[10px] uppercase font-black tracking-tight md:tracking-widest mb-1 leading-tight">Beneficiários</p>
+                    <p className="text-base md:text-xl font-black text-blue-400">{dados.resumo.beneficiarios}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-purple-200/40 text-[10px] uppercase font-black tracking-widest mb-1">Custo Médio</p>
-                    <p className="text-xl font-black text-purple-300">{fmt(dados.resumo.custoMedio)}</p>
+                    <p className="text-purple-200/40 text-[9px] md:text-[10px] uppercase font-black tracking-tight md:tracking-widest mb-1 leading-tight">Custo Médio</p>
+                    <p className="text-base md:text-xl font-black text-purple-300 break-all">{fmt(dados.resumo.custoMedio)}</p>
                   </div>
                 </div>
               </div>
@@ -234,9 +234,9 @@ function SecaoPrestacaoContas() {
                   <div className="space-y-3">
                     {entradasPub.map((c, i) => (
                       <div key={i}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-purple-100 font-bold">{c.categoria}</span>
-                          <span className="text-green-400 font-black">{fmt(c.valor)}</span>
+                        <div className="flex justify-between text-sm mb-1 gap-2">
+                          <span className="text-purple-100 font-bold truncate min-w-0">{c.categoria}</span>
+                          <span className="text-green-400 font-black whitespace-nowrap flex-shrink-0">{fmt(c.valor)}</span>
                         </div>
                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-green-500/60 rounded-full" style={{ width: `${(c.valor / (totalDoacoes || 1)) * 100}%` }} />
@@ -274,9 +274,9 @@ function SecaoPrestacaoContas() {
                   <div className="space-y-3">
                     {saidasPub.map((c, i) => (
                       <div key={i}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-purple-100 font-bold">{c.categoria}</span>
-                          <span className="text-red-400 font-black">{fmt(c.valor)}</span>
+                        <div className="flex justify-between text-sm mb-1 gap-2">
+                          <span className="text-purple-100 font-bold truncate min-w-0">{c.categoria}</span>
+                          <span className="text-red-400 font-black whitespace-nowrap flex-shrink-0">{fmt(c.valor)}</span>
                         </div>
                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-red-500/60 rounded-full" style={{ width: `${(c.valor / (totalGasto || 1)) * 100}%` }} />
