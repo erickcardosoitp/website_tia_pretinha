@@ -82,30 +82,38 @@ function SecaoPrestacaoContas() {
     ...(totalFuncionarios > 0 ? [{ descricao: 'Funcionários (consolidado)', categoria: 'Funcionários', valor: totalFuncionarios, tipo: 'Saída', data: null }] : []),
   ];
 
-  // Categorias para resumo (agrupadas) — só "Entrada" real
-  const catReceita = agrupar(
-    (dados?.porCategoria ?? []).filter(c => c.tipo === 'Entrada'),
-    c => c.categoria,
-    c => c.valor
-  );
-  const catDespesaDetalhe = agrupar(
-    (dados?.porCategoria ?? []).filter(c => c.tipo === 'Saída' && !ehFuncionarios(c.categoria)),
-    c => c.categoria,
-    c => c.valor
-  );
-  const totalCatFuncionarios = (dados?.porCategoria ?? [])
-    .filter(c => c.tipo === 'Saída' && ehFuncionarios(c.categoria))
-    .reduce((s, c) => s + Number(c.valor ?? 0), 0);
-  const catDespesa = [
-    ...catDespesaDetalhe,
-    ...(totalCatFuncionarios > 0 ? [{ categoria: 'Funcionários (consolidado)', tipo: 'Saída', valor: totalCatFuncionarios }] : []),
-  ].sort((a, b) => b.valor - a.valor);
-
-  const maxDespesa = Math.max(...catDespesa.map(c => c.valor), 1);
-
   const totalDoacoes = receitas.reduce((s, m) => s + Number(m.valor ?? 0), 0);
   const totalGasto = despesas.reduce((s, m) => s + Number(m.valor ?? 0), 0);
   const saldoDoacoes = totalDoacoes - totalGasto;
+
+  const categoriaPub = (cat, tipo) => {
+    const c = (cat ?? '').toLowerCase();
+    if (tipo === 'Entrada') {
+      if (c.includes('doa')) return 'Doações';
+      if (c.includes('uniform')) return 'Venda de Uniformes';
+      if (c.includes('evento')) return 'Eventos Beneficentes';
+      if (c.includes('celia') || c.includes('célia') || c.includes('material')) return 'Contribuições da Diretoria';
+      return 'Outras Entradas';
+    } else {
+      if (c.includes('cozinha')) return 'Alimentação';
+      if (c.includes('material') || c.includes('celia') || c.includes('célia')) return 'Material Escolar e Manutenção';
+      if (c.includes('funcionari')) return 'Funcionários';
+      if (c.includes('evento')) return 'Eventos';
+      return 'Outros';
+    }
+  };
+
+  const entradasPub = agrupar(
+    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Entrada'),
+    m => categoriaPub(m.categoria, 'Entrada'),
+    m => m.valor
+  );
+
+  const saidasPub = agrupar(
+    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Saída'),
+    m => categoriaPub(m.categoria, 'Saída'),
+    m => m.valor
+  );
 
   return (
     <section id="transparencia" className="py-24 bg-[#2D1B4D] px-4 md:px-8 relative overflow-hidden">
@@ -182,22 +190,6 @@ function SecaoPrestacaoContas() {
               ))}
             </div>
 
-            {/* Totais Receita / Despesa */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-              <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-green-500/20">
-                <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total de Entradas</p>
-                <p className="text-3xl font-black text-green-400">{fmt(totalDoacoes)}</p>
-              </div>
-              <div className="bg-[#1F1235] rounded-[2rem] p-7 border border-red-500/20">
-                <p className="text-red-400/70 text-xs uppercase font-black tracking-widest mb-2">Total Gasto</p>
-                <p className="text-3xl font-black text-red-400">{fmt(totalGasto)}</p>
-              </div>
-              <div className={`bg-[#1F1235] rounded-[2rem] p-7 border ${saldoDoacoes >= 0 ? 'border-yellow-400/30' : 'border-red-500/20'}`}>
-                <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo do Mês</p>
-                <p className={`text-3xl font-black ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(saldoDoacoes)}</p>
-              </div>
-            </div>
-
             {/* Abas */}
             <div className="flex flex-wrap gap-2 mb-6">
               {[['resumo', 'Resumo por Categoria'], ['extrato', 'Extrato Completo']].map(([k, label]) => (
@@ -213,42 +205,79 @@ function SecaoPrestacaoContas() {
 
             {/* Aba Resumo */}
             {abaAtiva === 'resumo' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Entradas por categoria */}
+              <div className="space-y-6">
+                {/* Entradas */}
                 <div className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5">
-                  <h3 className="text-green-400 font-black uppercase tracking-widest text-sm mb-6">Entradas por Categoria</h3>
-                  {catReceita.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
+                  <h3 className="text-green-400 font-black uppercase tracking-widest text-sm mb-6">Entradas</h3>
+                  {entradasPub.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
                   <div className="space-y-3">
-                    {catReceita.map((c, i) => (
+                    {entradasPub.map((c, i) => (
                       <div key={i}>
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-purple-100 font-bold truncate max-w-[60%]">{c.categoria || 'Outros'}</span>
+                          <span className="text-purple-100 font-bold">{c.categoria}</span>
                           <span className="text-green-400 font-black">{fmt(c.valor)}</span>
                         </div>
                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                          <div className="h-full bg-green-500/60 rounded-full" style={{ width: `${(c.valor / (dados.resumo.totalReceitas || 1)) * 100}%` }} />
+                          <div className="h-full bg-green-500/60 rounded-full" style={{ width: `${(c.valor / (totalDoacoes || 1)) * 100}%` }} />
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Saídas por categoria */}
+                {/* Patrocínios — estático */}
+                <div className="bg-[#1F1235] rounded-[2rem] p-8 border border-yellow-400/20">
+                  <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-6">Patrocínios &amp; Parcerias</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-4">
+                      <img src="/logo_ceasa.png" alt="CEASA" className="h-12 w-auto object-contain flex-shrink-0" />
+                      <div>
+                        <p className="text-white font-black text-sm">CEASA — Banco de Alimentos</p>
+                        <p className="text-purple-300/60 text-xs mt-1">45 caixas de hortifruti</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-4">
+                      <img src="/logo_ame.png" alt="Instituto AME" className="h-12 w-auto object-contain flex-shrink-0" />
+                      <div>
+                        <p className="text-white font-black text-sm">Instituto Direitos Humanos AME</p>
+                        <p className="text-purple-300/60 text-xs mt-1">Semana de quentinhas</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Saídas */}
                 <div className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5">
-                  <h3 className="text-red-400 font-black uppercase tracking-widest text-sm mb-6">Saídas por Categoria</h3>
-                  {catDespesa.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
+                  <h3 className="text-red-400 font-black uppercase tracking-widest text-sm mb-6">Saídas</h3>
+                  {saidasPub.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
                   <div className="space-y-3">
-                    {catDespesa.map((c, i) => (
+                    {saidasPub.map((c, i) => (
                       <div key={i}>
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-purple-100 font-bold truncate max-w-[60%]">{c.categoria || 'Outros'}</span>
+                          <span className="text-purple-100 font-bold">{c.categoria}</span>
                           <span className="text-red-400 font-black">{fmt(c.valor)}</span>
                         </div>
                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                          <div className="h-full bg-red-500/60 rounded-full" style={{ width: `${(c.valor / maxDespesa) * 100}%` }} />
+                          <div className="h-full bg-red-500/60 rounded-full" style={{ width: `${(c.valor / (totalGasto || 1)) * 100}%` }} />
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Consolidado final */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-[#1F1235] rounded-[2rem] p-6 border border-green-500/20 text-center">
+                    <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total Arrecadado</p>
+                    <p className="text-2xl font-black text-green-400">{fmt(totalDoacoes)}</p>
+                  </div>
+                  <div className="bg-[#1F1235] rounded-[2rem] p-6 border border-red-500/20 text-center">
+                    <p className="text-red-400/70 text-xs uppercase font-black tracking-widest mb-2">Total Gasto</p>
+                    <p className="text-2xl font-black text-red-400">{fmt(totalGasto)}</p>
+                  </div>
+                  <div className={`bg-[#1F1235] rounded-[2rem] p-6 border ${saldoDoacoes >= 0 ? 'border-yellow-400/30' : 'border-red-500/20'} text-center`}>
+                    <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo do Mês</p>
+                    <p className={`text-2xl font-black ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(saldoDoacoes)}</p>
                   </div>
                 </div>
               </div>
