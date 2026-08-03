@@ -20,7 +20,9 @@ const staggerContainer = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
 };
-const REVEAL_VIEWPORT = { once: true, amount: 0.2 };
+// amount baixo (não 0.2+) porque containers com stagger (grids de cards) podem ser
+// bem mais altos que a tela no mobile — com threshold alto o whileInView nunca dispara
+const REVEAL_VIEWPORT = { once: true, amount: 0.05 };
 
 // Carrossel do Acervo: quantas fotos ficam visíveis na pilha (efeito "álbum")
 const PILHA_TAMANHO = 4;
@@ -250,23 +252,24 @@ function SecaoPrestacaoContas() {
         {!carregando && dados && mesSelecionado <= ULTIMO_MES_PUBLICADO && (
           <>
             {/* KPI Cards */}
-            <motion.div
-              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
-              initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
-            >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               {[
                 { label: 'Alunos Ativos', valor: dados.resumo.alunosAtivos, unidade: 'alunos', cor: 'text-yellow-400' },
                 { label: 'Cursos', valor: dados.resumo.cursosAtivos, unidade: 'ativos', cor: 'text-purple-300' },
                 { label: 'Voluntários', valor: dados.resumo.voluntarios, unidade: 'pessoas', cor: 'text-blue-400' },
                 { label: 'Saldo do Mês', valor: fmt(saldoDoacoes), unidade: '', cor: saldoDoacoes >= 0 ? 'text-green-400' : 'text-red-400' },
               ].map((k, i) => (
-                <motion.div key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5" variants={fadeUp}>
+                <motion.div
+                  key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5"
+                  initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+                  transition={{ duration: 0.7, ease: 'easeOut', delay: i * 0.08 }}
+                >
                   <p className="text-purple-200/50 text-xs uppercase font-black tracking-widest mb-2">{k.label}</p>
                   <p className={`text-lg md:text-3xl font-black leading-tight break-all ${k.cor}`}>{k.valor}</p>
                   {k.unidade && <p className="text-purple-200/30 text-xs mt-1 uppercase font-bold">{k.unidade}</p>}
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
 
             {/* Custo por Beneficiário */}
             {dados.resumo.totalInvestido > 0 && (
@@ -549,13 +552,16 @@ function SecaoSuporte() {
   }
 
   return (
-    <motion.section
+    <section
       id="suporte" className="py-16 md:py-32 bg-[#1a0a35] text-white px-4 md:px-8"
-      initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
     >
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic text-center mb-4">SUPORTE E <span className="text-yellow-400">ATENDIMENTO</span></h2>
-        <p className="text-purple-300 text-center mb-10">Abra um chamado ou consulte o status de um atendimento.</p>
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+        >
+          <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic text-center mb-4">SUPORTE E <span className="text-yellow-400">ATENDIMENTO</span></h2>
+          <p className="text-purple-300 text-center mb-10">Abra um chamado ou consulte o status de um atendimento.</p>
+        </motion.div>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-8">
@@ -659,7 +665,7 @@ function SecaoSuporte() {
           </div>
         )}
       </div>
-    </motion.section>
+    </section>
   );
 }
 
@@ -792,7 +798,7 @@ function App() {
 {/* BOTÃO FLUTUANTE - MARKETPLACE */}
 <a
   href="/marketplace"
-  className="fixed bottom-8 left-8 z-[200] w-16 h-16 bg-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center hover:scale-110 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35)] active:scale-95 transition-all duration-300 group"
+  className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[200] w-14 h-14 md:w-16 md:h-16 bg-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center hover:scale-110 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35)] active:scale-95 transition-all duration-300 group"
   title="Marketplace Instituto Tia Pretinha"
 >
   {/* Ícone de carrinho SVG - preto */}
@@ -845,7 +851,7 @@ function App() {
                   activeSection === item ? 'text-yellow-400' : 'text-purple-200 hover:text-white'
                 }`}
               >
-                {item === 'transparencia' ? 'Transparência' : item.replace('-', ' ')}
+                {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item.replace('-', ' ')}
                 {activeSection === item && (
                   <motion.span layoutId="nav-underline" className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full" transition={{ type: 'spring', stiffness: 380, damping: 30 }} />
                 )}
@@ -889,7 +895,7 @@ function App() {
                       activeSection === item ? 'text-yellow-400 bg-white/5' : 'text-purple-200 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    {item === 'transparencia' ? 'Transparência' : item.replace('-', ' ')}
+                    {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item.replace('-', ' ')}
                   </a>
                 ))}
               </div>
@@ -1029,15 +1035,13 @@ function App() {
     >
       PROJETOS
     </motion.h2>
-    <motion.div
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-      initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
-    >
-      {projetos.map((p) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      {projetos.map((p, idx) => (
         <motion.div
           key={p.id}
           className="bg-[#2D1B4D] rounded-[2.5rem] overflow-hidden flex flex-col group shadow-2xl"
-          variants={fadeUp}
+          initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+          transition={{ duration: 0.7, ease: 'easeOut', delay: (idx % 4) * 0.08 }}
           whileHover={{ y: -8 }}
         >
           {/* FOTO: Ajustada para h-64 e zoom suave */}
@@ -1069,7 +1073,7 @@ function App() {
           </div>
         </motion.div>
       ))}
-    </motion.div>
+    </div>
   </div>
 </section>
 
@@ -1182,10 +1186,7 @@ function App() {
             className="text-5xl font-black mb-20 uppercase tracking-tighter text-yellow-400"
             initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
           >COMO AJUDAR</motion.h2>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left"
-            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
             {[
               { t: "Doações PIX", d: "Ajude a manter nossas oficinas e lanches.", b: "Copiar Chave", act: copiarChavePix },
               { t: "Materiais", d: "Roupas, alimentos e itens escolares.", b: "Como Doar", link: "https://wa.me/5521965540576" },
@@ -1193,7 +1194,8 @@ function App() {
             ].map((item, idx) => (
               <motion.div key={idx}
                 className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col h-full shadow-xl"
-                variants={fadeUp}
+                initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+                transition={{ duration: 0.7, ease: 'easeOut', delay: idx * 0.1 }}
                 whileHover={{ y: -8 }}
               >
                 <h3 className="text-2xl font-black mb-4 uppercase">{item.t}</h3>
@@ -1205,43 +1207,49 @@ function App() {
                 )}
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* PARCEIROS E LICENÇAS */}
       <section id="parceiros" className="py-20 md:py-40 px-4 md:px-8 bg-[#2D1B4D]">
-        <motion.div
-          className="max-w-6xl mx-auto text-center"
-          initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
-        >
-          <h2 className="text-5xl font-black mb-6 uppercase italic tracking-tighter">Parceiros &amp; Licenças</h2>
-          <p className="text-purple-200/60 max-w-2xl mx-auto mb-16">
-            Organizações e programas que apoiam o trabalho do Instituto Tia Pretinha.
-          </p>
+        <div className="max-w-6xl mx-auto text-center">
+          <motion.div
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+          >
+            <h2 className="text-5xl font-black mb-6 uppercase italic tracking-tighter">Parceiros &amp; Licenças</h2>
+            <p className="text-purple-200/60 max-w-2xl mx-auto mb-16">
+              Organizações e programas que apoiam o trabalho do Instituto Tia Pretinha.
+            </p>
+          </motion.div>
 
           <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-8 text-left">Parceiros</h3>
-          <motion.div
-            className="grid grid-cols-5 gap-2 sm:gap-4 md:gap-6 mb-16"
-            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
-          >
-            {PARCEIROS.map((p) => (
-              <motion.div key={p.nome} variants={fadeUp} className="bg-[#1F1235] rounded-xl sm:rounded-[2rem] p-1.5 sm:p-4 flex flex-col items-center justify-center gap-2 sm:gap-4 border border-white/5">
+          <div className="grid grid-cols-5 gap-2 sm:gap-4 md:gap-6 mb-16">
+            {PARCEIROS.map((p, idx) => (
+              <motion.div
+                key={p.nome}
+                initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+                transition={{ duration: 0.7, ease: 'easeOut', delay: idx * 0.08 }}
+                className="bg-[#1F1235] rounded-xl sm:rounded-[2rem] p-1.5 sm:p-4 flex flex-col items-center justify-center gap-2 sm:gap-4 border border-white/5"
+              >
                 <div className="w-full aspect-square flex items-center justify-center">
                   <img src={p.logo} alt={p.nome} className="max-h-full max-w-full object-contain rounded-lg sm:rounded-xl" loading="lazy" />
                 </div>
                 <p className="hidden sm:flex items-center justify-center min-h-[2.8em] text-[11px] text-purple-200/70 font-bold uppercase tracking-wide leading-tight text-center">{p.nome}</p>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
 
           <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-8 text-left">Licenças &amp; Ferramentas</h3>
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-3 gap-6"
-            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
-          >
-            {LICENCAS.map((l) => (
-              <motion.div key={l.nome} variants={fadeUp} whileHover={{ y: -4 }} className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5 flex flex-col items-center text-center gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {LICENCAS.map((l, idx) => (
+              <motion.div
+                key={l.nome}
+                initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+                transition={{ duration: 0.7, ease: 'easeOut', delay: idx * 0.08 }}
+                whileHover={{ y: -4 }}
+                className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5 flex flex-col items-center text-center gap-4"
+              >
                 {l.logo ? (
                   <div className="bg-white/90 rounded-xl inline-flex items-center justify-center px-6 py-4">
                     <img src={l.logo} alt={l.nome} className="h-16 w-auto max-w-[200px] object-contain" loading="lazy" />
@@ -1252,8 +1260,8 @@ function App() {
                 <p className="text-xs text-purple-300/60 leading-relaxed">{l.desc}</p>
               </motion.div>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* CONTATO */}
