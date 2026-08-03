@@ -1,6 +1,29 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/react"
+
+// Variantes de animação reutilizadas nas seções (scroll reveal)
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
+};
+const fadeLeft = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: 'easeOut' } },
+};
+const fadeRight = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: 'easeOut' } },
+};
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+const REVEAL_VIEWPORT = { once: true, amount: 0.2 };
+
+// Carrossel do Acervo: quantas fotos ficam visíveis na pilha (efeito "álbum")
+const PILHA_TAMANHO = 4;
 
 /**
  * INSTITUTO TIA PRETINHA - VERSÃO ESTRATÉGICA ONG
@@ -8,13 +31,62 @@ import { SpeedInsights } from "@vercel/speed-insights/react"
  * Correções: Enquadramento de Imagens, Nomes de Arquivos e Seção de Projetos
  */
 
-// 1. IMPORTAÇÃO DE IMAGENS
-const imagensImportadas = import.meta.glob('./carrosel_fotos/*.{jpeg,jpg,JPG,JPEG,png,PNG,webp}', { eager: true });
+// 1. IMPORTAÇÃO DE IMAGENS DO ACERVO (organizado por categoria em src/acervo/<categoria>/)
+const acervoModulos = import.meta.glob('./acervo/*/*.jpg', { eager: true });
 
-// 2. ORGANIZAÇÃO DA GALERIA
-const listaDeFotos = Object.values(imagensImportadas)
-  .map((mod) => mod.default)
-  .sort((a, b) => a.localeCompare(b));
+const ACERVO_CATEGORIAS = [
+  { id: 'futebol', label: 'Futebol' },
+  { id: 'ceasa', label: 'CEASA' },
+  { id: 'jantinha-ame', label: 'Jantinha AME' },
+  { id: 'roupas', label: 'Doação de Roupas' },
+  { id: 'acao-comunitaria', label: 'Ação Comunitária' },
+];
+
+const acervoPorCategoria = ACERVO_CATEGORIAS.reduce((acc, cat) => {
+  acc[cat.id] = Object.entries(acervoModulos)
+    .filter(([caminho]) => caminho.includes(`/acervo/${cat.id}/`))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, mod]) => mod.default);
+  return acc;
+}, {});
+
+// Fotos reais das turmas (src/acervo/mural_turma/<curso>.jpg) usadas nos cards de Projetos
+const muralTurmaPorNome = Object.fromEntries(
+  Object.entries(acervoModulos)
+    .filter(([caminho]) => caminho.includes('/acervo/mural_turma/'))
+    .map(([caminho, mod]) => [caminho.split('/').pop().replace(/\.jpg$/i, ''), mod.default])
+);
+
+// Logos de parceiros/associações e de licenças/ferramentas (src/acervo/parceiros/*)
+const parceirosModulos = import.meta.glob('./acervo/parceiros/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true });
+const logoPorNomeParceiro = Object.fromEntries(
+  Object.entries(parceirosModulos)
+    .map(([caminho, mod]) => [caminho.split('/').pop().replace(/\.(jpe?g|png)$/i, '').toLowerCase(), mod.default])
+);
+
+const PARCEIROS = [
+  { nome: 'CEASA — Banco de Alimentos', logo: '/logo_ceasa.png' },
+  { nome: 'Instituto de Direitos Humanos AME o Santo Amaro', logo: '/logo_ame.png' },
+  { nome: 'Associação de Moradores da Congonha', logo: logoPorNomeParceiro['associacao congonha'] },
+  { nome: 'Associação de Moradores de Vaz Lobo', logo: logoPorNomeParceiro['associacao vaz lobo'] },
+  { nome: 'Projeto Gol Social', logo: logoPorNomeParceiro['gol social'] },
+].filter(p => p.logo);
+
+const LICENCAS = [
+  { nome: 'Claude for Nonprofits', desc: 'Inteligência artificial usada no desenvolvimento e na manutenção deste site e em tarefas administrativas do dia a dia.', logo: logoPorNomeParceiro['claude'] },
+  { nome: 'Microsoft', desc: 'Ferramentas de produtividade — Word, Excel, Teams — para gestão administrativa e comunicação da equipe.', logo: logoPorNomeParceiro['microsoft'] },
+  { nome: 'Google Workspace', desc: 'E-mail institucional, Drive e planilhas colaborativas para organizar dados de alunos, financeiro e projetos.', logo: logoPorNomeParceiro['google'] || logoPorNomeParceiro['google workspace'] },
+  { nome: 'Azure', desc: 'Infraestrutura de nuvem que sustenta os sistemas do Instituto.', logo: logoPorNomeParceiro['azure'] },
+  { nome: 'Canva', desc: 'Criação de artes, banners e posts para as redes sociais e campanhas de divulgação.', logo: logoPorNomeParceiro['canva'] },
+  { nome: 'Adobe', desc: 'Edição de fotos e vídeos usados no registro e na divulgação das atividades do Instituto.', logo: logoPorNomeParceiro['adobe'] },
+];
+
+// Foto de destaque na tela principal (src/acervo_hero/03.jpg)
+const heroModulos = import.meta.glob('./acervo_hero/*.jpg', { eager: true });
+const fotosHero = Object.entries(heroModulos)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([, mod]) => mod.default);
+const fotoHero = fotosHero[0];
 
 const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
@@ -120,7 +192,10 @@ function SecaoPrestacaoContas() {
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 reveal transition-all duration-1000 opacity-0 translate-y-10">
+        <motion.div
+          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6"
+          initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+        >
           <div>
             <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">
               Prestação de<br /><span className="text-yellow-400">Contas</span>
@@ -139,7 +214,7 @@ function SecaoPrestacaoContas() {
               Ver Apresentação Completa →
             </a>
           </div>
-        </div>
+        </motion.div>
 
         {/* Filtro de meses */}
         {mesesDisponiveis.length > 0 && (
@@ -175,20 +250,23 @@ function SecaoPrestacaoContas() {
         {!carregando && dados && mesSelecionado <= ULTIMO_MES_PUBLICADO && (
           <>
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
+              initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
+            >
               {[
                 { label: 'Alunos Ativos', valor: dados.resumo.alunosAtivos, unidade: 'alunos', cor: 'text-yellow-400' },
                 { label: 'Cursos', valor: dados.resumo.cursosAtivos, unidade: 'ativos', cor: 'text-purple-300' },
                 { label: 'Voluntários', valor: dados.resumo.voluntarios, unidade: 'pessoas', cor: 'text-blue-400' },
                 { label: 'Saldo do Mês', valor: fmt(saldoDoacoes), unidade: '', cor: saldoDoacoes >= 0 ? 'text-green-400' : 'text-red-400' },
               ].map((k, i) => (
-                <div key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5 reveal opacity-0 translate-y-10 transition-all duration-700" style={{ transitionDelay: `${i * 80}ms` }}>
+                <motion.div key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5" variants={fadeUp}>
                   <p className="text-purple-200/50 text-xs uppercase font-black tracking-widest mb-2">{k.label}</p>
                   <p className={`text-lg md:text-3xl font-black leading-tight break-all ${k.cor}`}>{k.valor}</p>
                   {k.unidade && <p className="text-purple-200/30 text-xs mt-1 uppercase font-bold">{k.unidade}</p>}
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Custo por Beneficiário */}
             {dados.resumo.totalInvestido > 0 && (
@@ -251,16 +329,16 @@ function SecaoPrestacaoContas() {
                   <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-6">Patrocínios &amp; Parcerias</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-4">
-                      <img src="/logo_ceasa.png" alt="CEASA" className="h-12 w-auto object-contain flex-shrink-0" />
+                      <img src="/logo_ceasa.png" alt="CEASA" className="h-12 w-auto object-contain flex-shrink-0" loading="lazy" />
                       <div>
                         <p className="text-white font-black text-sm">CEASA — Banco de Alimentos</p>
                         <p className="text-purple-300/60 text-xs mt-1">45 caixas de hortifruti</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-4">
-                      <img src="/logo_ame.png" alt="Instituto AME" className="h-12 w-auto object-contain flex-shrink-0" />
+                      <img src="/logo_ame.png" alt="Instituto de Direitos Humanos AME o Santo Amaro" className="h-12 w-auto object-contain flex-shrink-0" loading="lazy" />
                       <div>
-                        <p className="text-white font-black text-sm">Instituto AME o Santo Amaro</p>
+                        <p className="text-white font-black text-sm">Instituto de Direitos Humanos AME o Santo Amaro</p>
                         <p className="text-purple-300/60 text-xs mt-1">Semana de quentinhas</p>
                       </div>
                     </div>
@@ -471,7 +549,10 @@ function SecaoSuporte() {
   }
 
   return (
-    <section id="suporte" className="py-16 md:py-32 bg-[#1a0a35] text-white px-4 md:px-8 reveal transition-all duration-1000 opacity-0 translate-y-10">
+    <motion.section
+      id="suporte" className="py-16 md:py-32 bg-[#1a0a35] text-white px-4 md:px-8"
+      initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+    >
       <div className="max-w-2xl mx-auto">
         <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic text-center mb-4">SUPORTE E <span className="text-yellow-400">ATENDIMENTO</span></h2>
         <p className="text-purple-300 text-center mb-10">Abra um chamado ou consulte o status de um atendimento.</p>
@@ -578,7 +659,7 @@ function SecaoSuporte() {
           </div>
         )}
       </div>
-    </section>
+    </motion.section>
   );
 }
 
@@ -586,36 +667,30 @@ function App() {
   const [activeSection, setActiveSection] = useState('inicio');
   const [projetoSelecionado, setProjetoSelecionado] = useState(null);
   const [fotoAtual, setFotoAtual] = useState(0);
+  const [categoriaAcervo, setCategoriaAcervo] = useState(ACERVO_CATEGORIAS[0].id);
   const [showPixToast, setShowPixToast] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
 
-  // --- LÓGICA DE ANIMAÇÃO NO SCROLL (REVEAL) ---
-  useEffect(() => {
-    const observerOptions = { threshold: 0.1 };
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('opacity-100', 'translate-y-0', 'translate-x-0');
-          entry.target.classList.remove('opacity-0', 'translate-y-10', 'translate-x-10', '-translate-x-10');
-        }
-      });
-    }, observerOptions);
 
-    const animatedElements = document.querySelectorAll('.reveal');
-    animatedElements.forEach(el => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, [activeSection]);
-
-  // --- LÓGICA DA GALERIA ---
-  const fotosGaleria = useMemo(() => listaDeFotos, []);
-  const proximaFoto = () => setFotoAtual((prev) => (prev + 1) % fotosGaleria.length);
-  const fotoAnterior = () => setFotoAtual((prev) => (prev - 1 + fotosGaleria.length) % fotosGaleria.length);
+  // --- LÓGICA DO ACERVO ---
+  const fotosAcervo = acervoPorCategoria[categoriaAcervo] || [];
+  const selecionarCategoriaAcervo = (id) => {
+    setCategoriaAcervo(id);
+    setFotoAtual(0);
+  };
+  const proximaFoto = () => setFotoAtual((prev) => (prev + 1) % fotosAcervo.length);
+  const fotoAnterior = () => setFotoAtual((prev) => (prev - 1 + fotosAcervo.length) % fotosAcervo.length);
+  const arrastarFoto = (_e, info) => {
+    const threshold = 80;
+    if (info.offset.x < -threshold) proximaFoto();
+    else if (info.offset.x > threshold) fotoAnterior();
+  };
 
   // --- TÍTULO DA PÁGINA ---
   useEffect(() => {
     const nomesSessoes = {
       'inicio': 'Início', 'sobre-nos': 'Sobre Nós', 'projetos': 'Projetos',
-      'galeria': 'Galeria', 'transparencia': 'Transparência', 'suporte': 'Suporte', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'contato': 'Contato'
+      'acervo': 'Acervo', 'transparencia': 'Transparência', 'suporte': 'Suporte', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'parceiros': 'Parceiros', 'contato': 'Contato'
     };
     document.title = `Instituto Tia Pretinha | ${nomesSessoes[activeSection] || 'Bem-vindo'}`;
   }, [activeSection]);
@@ -623,7 +698,7 @@ function App() {
   // --- DETECÇÃO DE SCROLL ---
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'contato'];
+      const sections = ['inicio', 'sobre-nos', 'projetos', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'];
       const scrollPosition = window.scrollY + 250;
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -645,69 +720,69 @@ function App() {
 
   // --- LISTA DE PROJETOS COM NOMES DE ARQUIVOS CORRIGIDOS ---
   const projetos = [
-    { 
-      id: 1, 
-      titulo: "Informática", 
-      prof: "Erick", 
-      desc: "Capacitação digital.", 
-      detalhe: "Ferramentas de produtividade.", 
-      img: "/pretina_ti.jpeg" 
+    {
+      id: 1,
+      titulo: "Informática",
+      prof: "Erick",
+      desc: "Aulas práticas de computador e internet para o dia a dia e o mercado de trabalho.",
+      detalhe: "Do básico — ligar o computador, digitação, navegação segura na internet e e-mail — até ferramentas de produtividade como editores de texto e planilhas. O objetivo é reduzir a exclusão digital e abrir portas para oportunidades de trabalho e estudo.",
+      img: muralTurmaPorNome.informatica || "/pretina_ti.jpeg"
     },
-    { 
-      id: 2, 
+    {
+      id: 2,
       titulo: "Ballet Clássico",
-      prof: "Ellen", 
-      desc: "Expressão artística.", 
-      detalhe: "Consciência corporal.", 
-      img: "/pretinha_ballet.jpeg" 
+      prof: "Ellen",
+      desc: "Postura, disciplina e expressão corporal através da dança clássica.",
+      detalhe: "As aulas trabalham alongamento, coordenação motora e musicalidade, além de fortalecer autoestima e disciplina. Encerramentos e apresentações valorizam o esforço de cada aluna na frente da comunidade.",
+      img: muralTurmaPorNome.ballet || "/pretinha_ballet.jpeg"
     },
-    { 
-      id: 3, 
-      titulo: "Jiu-Jitsu", 
-      prof: "Tico", 
-      desc: "Defesa pessoal.", 
-      detalhe: "Valores e autoconfiança.", 
-      img: "/pretinha_jiujtsu.jpeg" 
+    {
+      id: 3,
+      titulo: "Jiu-Jitsu",
+      prof: "Tico",
+      desc: "Defesa pessoal, respeito e disciplina no tatame.",
+      detalhe: "Além das técnicas de defesa pessoal, a modalidade ensina hierarquia, respeito ao próximo e controle emocional — valores que os alunos levam para fora do tatame.",
+      img: muralTurmaPorNome['jiu-jitsu'] || "/pretinha_jiujtsu.jpeg"
     },
-    { 
-      id: 4, 
-      titulo: "Danças Contemporâneas", 
-      prof: "Letícia", 
-      desc: "Movimento e criatividade.", 
-      detalhe: "Exploração da linguagem corporal.", 
-      img: "/pretinha_danca.jpeg" 
+    {
+      id: 4,
+      titulo: "Capoeira",
+      prof: "Anderson",
+      desc: "Ginga, música e ancestralidade afro-brasileira em roda.",
+      detalhe: "A capoeira une luta, dança e música numa só expressão. As crianças aprendem os toques do berimbau, as cantigas e a história da resistência negra brasileira, enquanto desenvolvem força, flexibilidade e ritmo.",
+      img: "/pretinha_capoeira.jpeg"
     },
-    { 
-      id: 5, 
-      titulo: "Capoeira", 
-      prof: "Anderson", 
-      desc: "Cultura e esporte.", 
-      detalhe: "Herança afro-brasileira.", 
-      img: "/pretinha_capoeira.jpeg" 
+    {
+      id: 5,
+      titulo: "Futebol",
+      prof: "João Paulo",
+      desc: "Integração social e trabalho em equipe através do esporte.",
+      detalhe: "Aulas gratuitas de futebol e futsal, com foco em disciplina, trabalho em equipe e integração social — o esporte como ferramenta de transformação, dentro e fora de campo.",
+      img: acervoPorCategoria.futebol?.[14] || "/pretinha_fut.jpeg"
     },
-    { 
-      id: 6, 
-      titulo: "Futebol", 
-      prof: "EM BREVE!", 
-      desc: "Integração social.", 
-      detalhe: "Trabalho em equipe.", 
-      img: "/pretinha_fut.jpeg" 
+    {
+      id: 6,
+      titulo: "Reforço Escolar",
+      prof: "Érica",
+      desc: "Apoio em Português e Matemática para fortalecer o desempenho escolar.",
+      detalhe: "Atendimento em grupo focado na dificuldade de cada aluno, com acompanhamento pedagógico que reforça o conteúdo visto na escola e ajuda a recuperar o que ficou pra trás.",
+      img: muralTurmaPorNome.reforco || "/pretinha_prevest.jpeg"
     },
-    { 
-      id: 7, 
-      titulo: "Inglês", 
-      prof: "Karina", 
-      desc: "Novo idioma.", 
-      detalhe: "Prática e conversação.", 
-      img: "/pretinha_ingles.jpeg" 
+    {
+      id: 7,
+      titulo: "Música",
+      prof: "A confirmar",
+      desc: "Teoria musical, ritmo e melodia — os primeiros passos de quem quer aprender música.",
+      detalhe: "As aulas trazem noções de harmonia, melodia e ritmo, incluindo o estudo das notas musicais, preparando o caminho para quem quer seguir tocando um instrumento ou cantando.",
+      img: muralTurmaPorNome.musica
     },
-    { 
-      id: 8, 
-      titulo: "Reforço Escolar", 
-      prof: "Érica", 
-      desc: "Apoio pedagógico.", 
-      detalhe: "Português e Matemática.", 
-      img: "/pretinha_prevest.jpeg" 
+    {
+      id: 8,
+      titulo: "Pré-Vestibular",
+      prof: "Equipe de Professores",
+      desc: "Preparação para o Enem e vestibulares, com aulas de reforço para jovens e adultos.",
+      detalhe: "Turma voltada para quem está se preparando para o Enem e vestibulares, com aulas de reforço nas principais disciplinas cobradas nas provas, incluindo língua inglesa.",
+      img: muralTurmaPorNome['pre-vest']
     }
   ];
 
@@ -754,81 +829,149 @@ function App() {
       {/* NAVBAR */}
       <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/90 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4 shadow-lg">
         <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
-          <img 
-            src="/png_instituto.jpg" 
-            alt="Logo" 
-            className="h-10 md:h-16 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform" 
-            onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} 
+          <img
+            src="/png_instituto.jpg"
+            alt="Logo"
+            className="h-10 md:h-16 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
           />
-          
-          <div className="flex items-center gap-5 overflow-x-auto lg:overflow-visible no-scrollbar py-2 max-w-[60%] md:max-w-none">
-            {['inicio', 'sobre-nos', 'projetos', 'galeria', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'contato'].map((item) => (
-              <a 
-                key={item} 
-                href={`#${item}`} 
+
+          <div className="hidden lg:flex items-center gap-5 py-2">
+            {['inicio', 'sobre-nos', 'projetos', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
+              <a
+                key={item}
+                href={`#${item}`}
                 className={`text-[10px] font-black uppercase tracking-widest relative py-2 whitespace-nowrap flex-shrink-0 transition-colors ${
                   activeSection === item ? 'text-yellow-400' : 'text-purple-200 hover:text-white'
                 }`}
               >
                 {item === 'transparencia' ? 'Transparência' : item.replace('-', ' ')}
                 {activeSection === item && (
-                  <span className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full"></span>
+                  <motion.span layoutId="nav-underline" className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full" transition={{ type: 'spring', stiffness: 380, damping: 30 }} />
                 )}
               </a>
             ))}
           </div>
 
-          <button onClick={copiarChavePix} className="bg-yellow-400 text-purple-950 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-md active:scale-95 transition-all">
-            PIX
-          </button>
+          <div className="flex items-center gap-3">
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={copiarChavePix} className="bg-yellow-400 text-purple-950 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-md">
+              PIX
+            </motion.button>
+            <button
+              onClick={() => setMenuAberto(v => !v)}
+              aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={menuAberto}
+              className="lg:hidden flex flex-col justify-center items-center gap-[5px] w-10 h-10 flex-shrink-0"
+            >
+              <span className={`block w-6 h-0.5 bg-white rounded-full transition-all ${menuAberto ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white rounded-full transition-all ${menuAberto ? 'opacity-0' : ''}`}></span>
+              <span className={`block w-6 h-0.5 bg-white rounded-full transition-all ${menuAberto ? '-rotate-45 -translate-y-[7px]' : ''}`}></span>
+            </button>
+          </div>
         </div>
+
+        <AnimatePresence>
+          {menuAberto && (
+            <motion.div
+              className="lg:hidden overflow-hidden max-w-7xl mx-auto"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+            >
+              <div className="mt-4 pb-2 flex flex-col gap-1">
+                {['inicio', 'sobre-nos', 'projetos', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
+                  <a
+                    key={item}
+                    href={`#${item}`}
+                    onClick={() => setMenuAberto(false)}
+                    className={`text-sm font-black uppercase tracking-widest py-3 px-2 rounded-lg transition-colors ${
+                      activeSection === item ? 'text-yellow-400 bg-white/5' : 'text-purple-200 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {item === 'transparencia' ? 'Transparência' : item.replace('-', ' ')}
+                  </a>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* HERO */}
-      <header id="inicio" className="relative min-h-screen flex items-center justify-center pt-20 px-4 md:px-8 text-center">
-        <div className="max-w-5xl z-10 reveal transition-all duration-1000 transform translate-y-10 opacity-0">
-          <h1 className="text-4xl sm:text-5xl md:text-9xl font-black leading-none mb-8 uppercase tracking-tighter italic">Instituto <br/><span className="text-yellow-400">Tia Pretinha</span></h1>
-          <p className="text-lg md:text-2xl text-purple-100 max-w-4xl mx-auto font-light mb-12 italic">"Transformando vidas com afeto e ação."</p>
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
-            <a href="#matricule-se" className="bg-yellow-400 text-purple-900 px-8 sm:px-12 py-5 rounded-2xl font-black text-base md:text-lg hover:scale-105 transition-all shadow-xl shadow-yellow-400/10">MATRICULE-SE</a>
-            <a href="#projetos" className="bg-purple-600/30 border-2 border-white/20 px-8 sm:px-12 py-5 rounded-2xl font-black text-base md:text-lg hover:bg-purple-600/50 transition-all">PROJETOS</a>
+      <header id="inicio" className="relative min-h-screen flex items-center justify-center pt-20 px-4 md:px-8 text-center overflow-hidden">
+        {fotoHero && (
+          <div className="absolute inset-0 z-0 bg-[#1F1235] overflow-hidden">
+            <motion.img
+              src={fotoHero}
+              alt=""
+              aria-hidden="true"
+              loading="eager"
+              fetchPriority="high"
+              initial={{ scale: 1.12 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 8, ease: 'easeOut' }}
+              className="absolute inset-0 w-full h-full object-cover object-[50%_42%]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4D]/55 via-[#2D1B4D]/40 to-[#2D1B4D]/75"></div>
           </div>
-        </div>
+        )}
+        <motion.div
+          className="max-w-5xl z-10"
+          initial="hidden" animate="visible" variants={staggerContainer}
+        >
+          <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl md:text-9xl font-black leading-none mb-8 uppercase tracking-tighter italic">Instituto <br/><span className="text-yellow-400">Tia Pretinha</span></motion.h1>
+          <motion.p variants={fadeUp} className="text-lg md:text-2xl text-purple-100 max-w-4xl mx-auto font-light mb-12 italic">"Transformando vidas com afeto e ação."</motion.p>
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
+            <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#matricule-se" className="bg-yellow-400 text-purple-900 px-8 sm:px-12 py-5 rounded-2xl font-black text-base md:text-lg shadow-xl shadow-yellow-400/10">MATRICULE-SE</motion.a>
+            <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#projetos" className="bg-purple-600/30 border-2 border-white/20 px-8 sm:px-12 py-5 rounded-2xl font-black text-base md:text-lg">PROJETOS</motion.a>
+          </motion.div>
+        </motion.div>
       </header>
 
       {/* SOBRE NÓS */}
 <section id="sobre-nos" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
   <div className="max-w-7xl mx-auto">
     {/* Título da Seção */}
-    <div className="text-center mb-20 reveal transition-all duration-1000 transform translate-y-10 opacity-0">
+    <motion.div
+      className="text-center mb-20"
+      initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+    >
       <h2 className="text-5xl md:text-7xl font-black mb-6 uppercase italic tracking-tighter">SOBRE NÓS</h2>
       <p className="text-2xl md:text-4xl text-yellow-400 font-medium leading-tight italic max-w-5xl mx-auto">
         "Aqui também é possível vencer."
       </p>
       <div className="h-2 w-24 bg-purple-500 mx-auto mt-8 rounded-full opacity-30"></div>
-    </div>
+    </motion.div>
 
     {/* Bloco Biográfico: Tia Pretinha */}
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-      
+
       {/* Imagem com Moldura Estilizada */}
-      <div className="relative reveal transition-all duration-1000 transform -translate-x-10 opacity-0">
+      <motion.div
+        className="relative"
+        initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeLeft}
+      >
         <div className="absolute -inset-4 border-2 border-yellow-400/30 rounded-[3rem] rotate-3 -z-10"></div>
         <div className="overflow-hidden rounded-[3rem] shadow-2xl border-4 border-white/10 aspect-[4/5] lg:aspect-auto">
-          <img 
-            src="/tiacelia.jpg" 
-            alt="Célia da Silva Paixão - Tia Pretinha" 
+          <img
+            src="/tiacelia.jpg"
+            alt="Célia da Silva Paixão - Tia Pretinha"
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+            loading="lazy"
           />
         </div>
         <div className="absolute -bottom-6 -right-6 bg-yellow-400 text-purple-950 p-8 rounded-3xl shadow-xl hidden md:block">
           <p className="font-black text-2xl uppercase italic leading-none">Célia da Silva Paixão</p>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 opacity-80">Fundadora & Nutricionista</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Conteúdo de Texto */}
-      <div className="reveal transition-all duration-1000 transform translate-x-10 opacity-0 text-left">
+      <motion.div
+        className="text-left"
+        initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeRight}
+      >
         <h3 className="text-3xl md:text-5xl font-black text-yellow-400 mb-8 uppercase italic leading-none">
           <span className="text-white">Tia Pretinha</span>
         </h3>
@@ -861,38 +1004,49 @@ function App() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
 
     {/* Manifesto Final */}
-    <div className="mt-24 text-center reveal transition-all duration-1000 opacity-0">
+    <motion.div
+      className="mt-24 text-center"
+      initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+    >
        <p className="text-xl md:text-2xl font-light italic text-purple-200">
          "Sou prova viva de que quando Deus planta um propósito, <br className="hidden md:block"/>
          nenhuma dificuldade consegue arrancar."
        </p>
-    </div>
+    </motion.div>
   </div>
 </section>
 
       {/* PROJETOS - APENAS ESTA SEÇÃO */}
 <section id="projetos" className="py-20 md:py-40 px-4 md:px-8 bg-[#1F1235]">
   <div className="max-w-7xl mx-auto">
-    <h2 className="text-5xl font-black mb-20 text-center uppercase italic reveal opacity-0 translate-y-10 transition-all duration-700">
+    <motion.h2
+      className="text-5xl font-black mb-20 text-center uppercase italic"
+      initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+    >
       PROJETOS
-    </h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      {projetos.map((p, idx) => (
-        <div 
-          key={p.id} 
-          className="bg-[#2D1B4D] rounded-[2.5rem] overflow-hidden flex flex-col group reveal opacity-0 translate-y-10 transition-all duration-700 shadow-2xl" 
-          style={{ transitionDelay: `${idx * 100}ms` }}
+    </motion.h2>
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+      initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
+    >
+      {projetos.map((p) => (
+        <motion.div
+          key={p.id}
+          className="bg-[#2D1B4D] rounded-[2.5rem] overflow-hidden flex flex-col group shadow-2xl"
+          variants={fadeUp}
+          whileHover={{ y: -8 }}
         >
           {/* FOTO: Ajustada para h-64 e zoom suave */}
           <div className="h-64 overflow-hidden bg-purple-900/20">
-            <img 
-              src={p.img} 
-              alt={p.titulo} 
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+            <img
+              src={p.img}
+              alt={p.titulo}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              loading="lazy"
             />
           </div>
 
@@ -901,7 +1055,7 @@ function App() {
               {p.titulo}
             </h3>
             <p className="text-[10px] font-black text-purple-400 mb-4 uppercase">
-              {p.prof === "EM BREVE!" ? p.prof : `Prof. ${p.prof}`}
+              {['EM BREVE!', 'A confirmar', 'Equipe de Professores'].includes(p.prof) ? p.prof : `Prof. ${p.prof}`}
             </p>
             <p className="text-sm text-purple-100/70 mb-8 leading-relaxed">
               {p.desc}
@@ -913,36 +1067,85 @@ function App() {
               Ver Detalhes
             </button>
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   </div>
 </section>
 
-      {/* GALERIA */}
-      <section id="galeria" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
-        <div className="max-w-6xl mx-auto text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
-          <h2 className="text-5xl font-black mb-20 uppercase italic tracking-tighter">GALERIA</h2>
-          {fotosGaleria.length > 0 ? (
-            <div className="relative h-[450px] md:h-[650px] rounded-[3rem] overflow-hidden border-4 border-white/5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] bg-black group flex items-center justify-center">
-              <img 
-                src={fotosGaleria[fotoAtual]} 
-                alt={`Foto ${fotoAtual + 1}`} 
-                className="max-w-full max-h-full object-contain transition-opacity duration-500"
-                loading="lazy" 
-                key={fotoAtual}
-              />
-              <button onClick={fotoAnterior} className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-14 h-14 rounded-full z-20 font-black text-xl transition-all shadow-xl">←</button>
-              <button onClick={proximaFoto} className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-14 h-14 rounded-full z-20 font-black text-xl transition-all shadow-xl">→</button>
-              <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-4">
-                <span className="bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-[12px] font-black tracking-widest border border-white/20">
-                  {fotoAtual + 1} / {fotosGaleria.length}
-                </span>
-                <div className="w-1/2 h-1 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-yellow-400 transition-all duration-300" 
-                    style={{ width: `${((fotoAtual + 1) / fotosGaleria.length) * 100}%` }}
-                  ></div>
+      {/* ACERVO */}
+      <section id="acervo" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
+        <motion.div
+          className="max-w-6xl mx-auto text-center"
+          initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+        >
+          <h2 className="text-5xl font-black mb-10 uppercase italic tracking-tighter">ACERVO</h2>
+
+          <div className="flex flex-wrap justify-center gap-2 mb-12">
+            {ACERVO_CATEGORIAS.map((cat) => (
+              <motion.button
+                key={cat.id}
+                onClick={() => selecionarCategoriaAcervo(cat.id)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-colors ${
+                  categoriaAcervo === cat.id ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/60 hover:bg-white/10'
+                }`}
+              >
+                {cat.label}
+              </motion.button>
+            ))}
+          </div>
+
+          {fotosAcervo.length > 0 ? (
+            <div className="flex justify-center pb-14">
+              <div
+                className="relative w-[300px] sm:w-[360px] md:w-[420px] aspect-[4/5] max-w-full"
+                style={{ perspective: 1200 }}
+              >
+                {Array.from({ length: Math.min(PILHA_TAMANHO, fotosAcervo.length) }, (_, i) => i)
+                  .slice().reverse()
+                  .map((pos) => {
+                    const idx = (fotoAtual + pos) % fotosAcervo.length;
+                    const src = fotosAcervo[idx];
+                    const inclinacao = pos === 0 ? 0 : (pos % 2 === 0 ? -4 : 4);
+                    return (
+                      <motion.img
+                        key={src}
+                        layout
+                        src={src}
+                        alt={`Foto ${idx + 1}`}
+                        loading="lazy"
+                        drag={pos === 0 ? 'x' : false}
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.6}
+                        dragMomentum={false}
+                        onDragEnd={pos === 0 ? arrastarFoto : undefined}
+                        animate={{
+                          x: 0,
+                          scale: 1 - pos * 0.06,
+                          y: pos * 16,
+                          rotate: inclinacao,
+                          opacity: 1,
+                        }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+                        style={{ zIndex: PILHA_TAMANHO - pos }}
+                        className={`absolute inset-0 w-full h-full object-cover rounded-[2rem] border-4 border-white/10 shadow-2xl bg-black ${pos === 0 ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none'}`}
+                      />
+                    );
+                  })}
+                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={fotoAnterior} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-9 h-9 rounded-full z-30 font-black text-sm shadow-xl">←</motion.button>
+                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={proximaFoto} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-9 h-9 rounded-full z-30 font-black text-sm shadow-xl">→</motion.button>
+                <div className="absolute -bottom-10 left-0 right-0 flex flex-col items-center gap-3">
+                  <span className="bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-[12px] font-black tracking-widest border border-white/20">
+                    {fotoAtual + 1} / {fotosAcervo.length}
+                  </span>
+                  <div className="w-1/2 h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-yellow-400 transition-all duration-300"
+                      style={{ width: `${((fotoAtual + 1) / fotosAcervo.length) * 100}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -951,7 +1154,7 @@ function App() {
               Nenhuma foto encontrada
             </div>
           )}
-        </div>
+        </motion.div>
       </section>
 
       {/* TRANSPARÊNCIA */}
@@ -960,24 +1163,38 @@ function App() {
       <SecaoSuporte />
 
       {/* MATRICULE-SE */}
-      <section id="matricule-se" className="py-20 md:py-32 bg-yellow-400 text-purple-950 px-4 md:px-8 text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
+      <motion.section
+        id="matricule-se" className="py-20 md:py-32 bg-yellow-400 text-purple-950 px-4 md:px-8 text-center"
+        initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+      >
         <h2 className="text-4xl md:text-8xl font-black mb-10 uppercase tracking-tighter italic text-center">MATRICULE-SE</h2>
-        <a href="https://itp.institutotiapretinha.org/inscricao" className="inline-block bg-purple-950 text-white px-8 md:px-16 py-5 md:py-6 rounded-3xl font-black text-lg md:text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase">Inscrição Online</a>
-      </section>
+        <motion.a
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          href="https://itp.institutotiapretinha.org/inscricao"
+          className="inline-block bg-purple-950 text-white px-8 md:px-16 py-5 md:py-6 rounded-3xl font-black text-lg md:text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] uppercase"
+        >Inscrição Online</motion.a>
+      </motion.section>
 
       {/* AJUDA / PIX */}
       <section id="como-ajudar" className="py-20 md:py-40 px-4 md:px-8 bg-[#2D1B4D]">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-5xl font-black mb-20 uppercase tracking-tighter text-yellow-400 reveal transition-all duration-700 opacity-0 translate-y-10">COMO AJUDAR</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+          <motion.h2
+            className="text-5xl font-black mb-20 uppercase tracking-tighter text-yellow-400"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+          >COMO AJUDAR</motion.h2>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
+          >
             {[
               { t: "Doações PIX", d: "Ajude a manter nossas oficinas e lanches.", b: "Copiar Chave", act: copiarChavePix },
               { t: "Materiais", d: "Roupas, alimentos e itens escolares.", b: "Como Doar", link: "https://wa.me/5521965540576" },
               { t: "Voluntário", d: "Compartilhe seu talento conosco.", b: "Quero Ajudar", link: "https://wa.me/5521965540576" }
             ].map((item, idx) => (
-              <div key={idx} 
-                className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col h-full shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2 reveal opacity-0 translate-y-10 transition-all duration-700"
-                style={{ transitionDelay: `${idx * 150}ms` }}
+              <motion.div key={idx}
+                className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col h-full shadow-xl"
+                variants={fadeUp}
+                whileHover={{ y: -8 }}
               >
                 <h3 className="text-2xl font-black mb-4 uppercase">{item.t}</h3>
                 <p className="text-purple-200/60 mb-8">{item.d}</p>
@@ -986,35 +1203,98 @@ function App() {
                 ) : (
                   <a href={item.link} target="_blank" rel="noreferrer" className="mt-auto inline-block bg-yellow-400 text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-white text-center transition-colors shadow-md">{item.b}</a>
                 )}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
+      </section>
+
+      {/* PARCEIROS E LICENÇAS */}
+      <section id="parceiros" className="py-20 md:py-40 px-4 md:px-8 bg-[#2D1B4D]">
+        <motion.div
+          className="max-w-6xl mx-auto text-center"
+          initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+        >
+          <h2 className="text-5xl font-black mb-6 uppercase italic tracking-tighter">Parceiros &amp; Licenças</h2>
+          <p className="text-purple-200/60 max-w-2xl mx-auto mb-16">
+            Organizações e programas que apoiam o trabalho do Instituto Tia Pretinha.
+          </p>
+
+          <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-8 text-left">Parceiros</h3>
+          <motion.div
+            className="grid grid-cols-5 gap-2 sm:gap-4 md:gap-6 mb-16"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
+          >
+            {PARCEIROS.map((p) => (
+              <motion.div key={p.nome} variants={fadeUp} className="bg-[#1F1235] rounded-xl sm:rounded-[2rem] p-1.5 sm:p-4 flex flex-col items-center justify-center gap-2 sm:gap-4 border border-white/5">
+                <div className="w-full aspect-square flex items-center justify-center">
+                  <img src={p.logo} alt={p.nome} className="max-h-full max-w-full object-contain rounded-lg sm:rounded-xl" loading="lazy" />
+                </div>
+                <p className="hidden sm:flex items-center justify-center min-h-[2.8em] text-[11px] text-purple-200/70 font-bold uppercase tracking-wide leading-tight text-center">{p.nome}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-8 text-left">Licenças &amp; Ferramentas</h3>
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-3 gap-6"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={staggerContainer}
+          >
+            {LICENCAS.map((l) => (
+              <motion.div key={l.nome} variants={fadeUp} whileHover={{ y: -4 }} className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5 flex flex-col items-center text-center gap-4">
+                {l.logo ? (
+                  <div className="bg-white/90 rounded-xl inline-flex items-center justify-center px-6 py-4">
+                    <img src={l.logo} alt={l.nome} className="h-16 w-auto max-w-[200px] object-contain" loading="lazy" />
+                  </div>
+                ) : (
+                  <p className="text-xl font-black uppercase">{l.nome}</p>
+                )}
+                <p className="text-xs text-purple-300/60 leading-relaxed">{l.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* CONTATO */}
       <section id="contato" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
-        <div className="max-w-5xl mx-auto text-center reveal transition-all duration-1000 opacity-0 translate-y-10">
+        <motion.div
+          className="max-w-5xl mx-auto text-center"
+          initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+        >
           <h2 className="text-5xl font-black mb-16 uppercase italic tracking-tighter">CONTATO</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <a href="https://www.instagram.com/ins.tia_pretinha/" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-all font-black uppercase text-[12px] tracking-widest shadow-lg">Instagram</a>
-            <a href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-all font-black uppercase text-[12px] tracking-widest shadow-lg">WhatsApp</a>
-            <a href="https://www.facebook.com/profile.php?id=100086387738515" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-all font-black uppercase text-[12px] tracking-widest shadow-lg">Facebook</a>
+            <motion.a whileHover={{ scale: 1.05, y: -4 }} whileTap={{ scale: 0.95 }} href="https://www.instagram.com/ins.tia_pretinha/" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-colors font-black uppercase text-[12px] tracking-widest shadow-lg">Instagram</motion.a>
+            <motion.a whileHover={{ scale: 1.05, y: -4 }} whileTap={{ scale: 0.95 }} href="https://wa.me/5521965540576" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-colors font-black uppercase text-[12px] tracking-widest shadow-lg">WhatsApp</motion.a>
+            <motion.a whileHover={{ scale: 1.05, y: -4 }} whileTap={{ scale: 0.95 }} href="https://www.facebook.com/profile.php?id=100086387738515" target="_blank" rel="noreferrer" className="p-8 bg-white/5 rounded-[2rem] hover:bg-yellow-400 hover:text-purple-950 transition-colors font-black uppercase text-[12px] tracking-widest shadow-lg">Facebook</motion.a>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* MODAL PROJETOS */}
+      <AnimatePresence>
       {projetoSelecionado && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-purple-950/98 backdrop-blur-xl">
-          <div className="bg-white text-purple-950 max-w-2xl w-full rounded-[2rem] md:rounded-[4rem] p-6 md:p-12 relative shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+        <motion.div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-purple-950/98 backdrop-blur-xl"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          onClick={() => setProjetoSelecionado(null)}
+        >
+          <motion.div
+            className="bg-white text-purple-950 max-w-2xl w-full rounded-[2rem] md:rounded-[4rem] p-6 md:p-12 relative shadow-[0_0_100px_rgba(0,0,0,0.5)]"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button onClick={() => setProjetoSelecionado(null)} className="absolute top-8 right-10 text-3xl font-black">✕</button>
             <h3 className="text-4xl font-black uppercase mb-6 tracking-tighter">{projetoSelecionado.titulo}</h3>
             <p className="text-xl text-slate-700 mb-10 leading-relaxed font-light italic">"{projetoSelecionado.detalhe}"</p>
             <button onClick={() => setProjetoSelecionado(null)} className="bg-purple-700 text-white px-8 py-5 rounded-2xl font-black w-full uppercase tracking-widest shadow-lg">Fechar</button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* FOOTER */}
       <footer className="bg-black py-16 px-4 md:px-8 text-center border-t border-white/5">

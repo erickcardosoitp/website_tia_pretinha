@@ -120,7 +120,6 @@ export default function Marketplace() {
   const [carrinho, setCarrinho]             = useState([])
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [pixCopiado, setPixCopiado]         = useState(false)
-  const [sidebarMobile, setSidebarMobile]   = useState(false)
 
   // ── Carrinho helpers ──────────────────────────────────────────────────────
   const addItem = (p) =>
@@ -376,6 +375,7 @@ export default function Marketplace() {
                         src={p.img}
                         alt={p.nome}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                         onError={e => {
                           // fallback placeholder se foto não existir ainda
                           e.target.style.display = 'none'
@@ -491,6 +491,7 @@ export default function Marketplace() {
                         src={item.img}
                         alt={item.nome}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                         onError={e => {
                           e.target.style.display = 'none'
                           e.target.parentNode.style.background = 'linear-gradient(135deg, #2D1B4D, #4C1D95)'

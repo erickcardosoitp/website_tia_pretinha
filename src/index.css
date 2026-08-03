@@ -5,3 +5,25 @@
   --color-roxo-principal: #6B21A8;
   --color-amarelo-destaque: #FACC15;
 }
+
+/* Scrollbar customizada (Firefox) */
+html {
+  scrollbar-color: #FACC15 #1F1235;
+  scrollbar-width: thin;
+}
+
+/* Scrollbar customizada (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #1F1235;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #FACC15;
+  border-radius: 999px;
+  border: 3px solid #1F1235;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #fde047;
+}
