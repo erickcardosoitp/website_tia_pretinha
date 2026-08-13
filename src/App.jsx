@@ -94,7 +94,7 @@ const fotoHero = fotosHero[0];
 const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
 const LINK_APRESENTACAO = 'https://drive.google.com/file/d/1EXb3z0h_vGt2mDAJ__9CbDZBzRF8pEXu/view?usp=sharing';
-const ULTIMO_MES_PUBLICADO = '2026-07'; // atualizar ao fechar cada mês
+const ULTIMO_MES_PUBLICADO = '2026-06'; // atualizar ao fechar cada mês
 
 function fmt(valor) {
   return Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -106,7 +106,7 @@ function SecaoPrestacaoContas() {
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [abaAtiva, setAbaAtiva] = useState('resumo');
-  const [mesSelecionado, setMesSelecionado] = useState('2026-07');
+  const [mesSelecionado, setMesSelecionado] = useState('2026-06');
   const [mesesDisponiveis, setMesesDisponiveis] = useState([]);
 
   useEffect(() => {
