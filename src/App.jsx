@@ -42,6 +42,7 @@ const ACERVO_CATEGORIAS = [
   { id: 'jantinha-ame', label: 'Jantinha AME' },
   { id: 'roupas', label: 'Doação de Roupas' },
   { id: 'acao-comunitaria', label: 'Ação Comunitária' },
+  { id: 'maos-que-acolhem', label: 'Mãos Que Acolhem' },
 ];
 
 const acervoPorCategoria = ACERVO_CATEGORIAS.reduce((acc, cat) => {
@@ -696,7 +697,7 @@ function App() {
   useEffect(() => {
     const nomesSessoes = {
       'inicio': 'Início', 'sobre-nos': 'Sobre Nós', 'projetos': 'Projetos',
-      'acervo': 'Acervo', 'transparencia': 'Transparência', 'suporte': 'Suporte', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'parceiros': 'Parceiros', 'contato': 'Contato'
+      'maos-que-acolhem': 'Mãos Que Acolhem', 'acervo': 'Acervo', 'transparencia': 'Transparência', 'suporte': 'Suporte', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'parceiros': 'Parceiros', 'contato': 'Contato'
     };
     document.title = `Instituto Tia Pretinha | ${nomesSessoes[activeSection] || 'Bem-vindo'}`;
   }, [activeSection]);
@@ -704,7 +705,7 @@ function App() {
   // --- DETECÇÃO DE SCROLL ---
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['inicio', 'sobre-nos', 'projetos', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'];
+      const sections = ['inicio', 'sobre-nos', 'projetos', 'maos-que-acolhem', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'];
       const scrollPosition = window.scrollY + 250;
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -843,7 +844,7 @@ function App() {
           />
 
           <div className="hidden lg:flex items-center gap-5 py-2">
-            {['inicio', 'sobre-nos', 'projetos', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
+            {['inicio', 'sobre-nos', 'projetos', 'maos-que-acolhem', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
               <a
                 key={item}
                 href={`#${item}`}
@@ -851,7 +852,7 @@ function App() {
                   activeSection === item ? 'text-yellow-400' : 'text-purple-200 hover:text-white'
                 }`}
               >
-                {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item.replace('-', ' ')}
+                {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item === 'maos-que-acolhem' ? 'Mãos Que Acolhem' : item.replace('-', ' ')}
                 {activeSection === item && (
                   <motion.span layoutId="nav-underline" className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full" transition={{ type: 'spring', stiffness: 380, damping: 30 }} />
                 )}
@@ -886,7 +887,7 @@ function App() {
               transition={{ duration: 0.25, ease: 'easeInOut' }}
             >
               <div className="mt-4 pb-2 flex flex-col gap-1">
-                {['inicio', 'sobre-nos', 'projetos', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
+                {['inicio', 'sobre-nos', 'projetos', 'maos-que-acolhem', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
                   <a
                     key={item}
                     href={`#${item}`}
@@ -895,7 +896,7 @@ function App() {
                       activeSection === item ? 'text-yellow-400 bg-white/5' : 'text-purple-200 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item.replace('-', ' ')}
+                    {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item === 'maos-que-acolhem' ? 'Mãos Que Acolhem' : item.replace('-', ' ')}
                   </a>
                 ))}
               </div>
@@ -1076,6 +1077,112 @@ function App() {
     </div>
   </div>
 </section>
+
+      {/* MÃOS QUE ACOLHEM */}
+      <section id="maos-que-acolhem" className="py-20 md:py-40 bg-[#2D1B4D] px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="text-center mb-16"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+          >
+            <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">
+              Mãos Que <span className="text-yellow-400">Acolhem</span>
+            </h2>
+            <p className="mt-6 text-purple-200/70 text-lg max-w-3xl mx-auto">
+              Acolhimento, orientação e apoio às famílias de pessoas privadas de liberdade no sistema prisional do Rio de Janeiro — em colaboração com a Secretaria de Estado de Administração Penitenciária (SEAP/RJ), sem vínculo institucional entre as partes.
+            </p>
+          </motion.div>
+
+          {/* Fotos + Justificativa */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            <motion.div
+              className="grid grid-cols-3 gap-3"
+              initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeLeft}
+            >
+              {(acervoPorCategoria['maos-que-acolhem'] || []).map((src, i) => (
+                <div key={i} className={`overflow-hidden rounded-[1.5rem] border-2 border-white/10 shadow-xl ${i === 0 ? 'col-span-3 aspect-[16/9]' : 'aspect-square'}`}>
+                  <img src={src} alt={`Mãos Que Acolhem ${i + 1}`} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                </div>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeRight}
+            >
+              <h3 className="text-2xl md:text-3xl font-black text-yellow-400 uppercase italic mb-4">Por que existe</h3>
+              <p className="text-purple-100/90 leading-relaxed mb-4">
+                O encarceramento não afeta só quem está preso — atinge famílias inteiras, que enfrentam desinformação, fragilidade emocional e ruptura de vínculos sociais. A falta de acolhimento humanizado agrava tensões no ambiente prisional e distancia as famílias da administração penitenciária.
+              </p>
+              <p className="text-purple-100/90 leading-relaxed">
+                Reconhecendo a família como peça-chave da ressocialização, o Instituto Tia Pretinha atua como ponte de apoio nesse processo — de forma complementar, humanizada e respeitando integralmente as normas de segurança das unidades.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Objetivos específicos */}
+          <motion.div
+            className="mb-16"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+          >
+            <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-8 text-center">O que fazemos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { t: 'Recepção Humanizada', d: 'Acolhimento presencial das famílias em dias de visita.' },
+                { t: 'Orientação', d: 'Apoio para entender rotinas e procedimentos prisionais.' },
+                { t: 'Canal de Apoio', d: 'Mediação complementar entre famílias e a administração penitenciária.' },
+                { t: 'Voluntariado', d: 'Voluntários capacitados e supervisionados em campo.' },
+              ].map((item, idx) => (
+                <motion.div
+                  key={item.t}
+                  className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5"
+                  initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+                  transition={{ duration: 0.7, ease: 'easeOut', delay: idx * 0.08 }}
+                >
+                  <h4 className="text-white font-black uppercase text-sm mb-2">{item.t}</h4>
+                  <p className="text-purple-200/70 text-sm leading-relaxed">{item.d}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Impacto esperado */}
+          <motion.div
+            className="bg-[#1F1235] rounded-[2.5rem] p-8 md:p-12 border border-yellow-400/20 mb-16"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+          >
+            <h3 className="text-yellow-400 font-black uppercase tracking-widest text-sm mb-6">Impacto Esperado</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+              {[
+                'Humanização do ambiente prisional',
+                'Redução de ansiedade, tensão e conflitos no entorno das unidades',
+                'Melhoria da comunicação entre famílias e administração penitenciária',
+                'Fortalecimento dos vínculos familiares',
+                'Contribuição indireta para a ressocialização',
+                'Apoio à política penitenciária do Estado do Rio de Janeiro',
+              ].map((txt) => (
+                <div key={txt} className="flex items-start gap-3">
+                  <span className="text-yellow-400 font-black">✓</span>
+                  <p className="text-purple-100/85 text-sm leading-relaxed">{txt}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="text-center"
+            initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
+          >
+            <a
+              href="https://wa.me/5521965540576"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block bg-yellow-400 text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white transition-colors shadow-xl"
+            >
+              Quero Participar ou Apoiar
+            </a>
+          </motion.div>
+        </div>
+      </section>
 
       {/* ACERVO */}
       <section id="acervo" className="py-20 md:py-40 bg-[#1F1235] px-4 md:px-8">
