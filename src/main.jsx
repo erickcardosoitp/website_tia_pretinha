@@ -2,6 +2,7 @@ import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
+import './appInsights.js'
 import App from './App.jsx'
 
 const Marketplace = lazy(() => import('./marketplace.jsx'))
