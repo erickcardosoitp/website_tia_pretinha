@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/react"
 
 // Variantes de animação reutilizadas nas seções (scroll reveal)
 const fadeUp = {
@@ -1417,9 +1415,6 @@ function App() {
         <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-2">CNPJ 11.759.851/0001-39</p>
         <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6 italic">Arquitetura Digital por Erick Gonçalves Cardoso</p>
       </footer>
-
-      <Analytics /> {}
-      <SpeedInsights /> {}
     </div>
   )
   

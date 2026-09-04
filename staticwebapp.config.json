@@ -1,0 +1,17 @@
+{
+  "routes": [
+    {
+      "route": "/matricula",
+      "redirect": "https://itp.institutotiapretinha.org/inscricao",
+      "statusCode": 302
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.itp.institutotiapretinha.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    "X-Frame-Options": "DENY",
+    "Permissions-Policy": "geolocation=(), microphone=(), camera=()"
+  }
+}
