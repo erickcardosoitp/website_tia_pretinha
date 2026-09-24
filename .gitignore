@@ -31,3 +31,5 @@ dist-ssr
 
 # Acervo bruto (fotos/vídeos originais, não processados) - nunca commitar
 /fotos_acervo
+
+.vercel
