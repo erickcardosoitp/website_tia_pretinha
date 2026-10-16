@@ -137,7 +137,10 @@ function SecaoPrestacaoContas() {
       });
   }, [mesSelecionado]);
 
-  const ehFuncionarios = (cat) => (cat ?? '').toLowerCase().includes('funcionari');
+  // Sem acento: a categoria "Adiantamentos a Funcionários" (com á) escapava do filtro
+  // e expunha nome de funcionário no extrato público.
+  const normalizar = (txt) => (txt ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const ehFuncionarios = (cat) => normalizar(cat).includes('funcionari');
 
   const agrupar = (lista, keyFn, valFn) =>
     Object.values(lista.reduce((acc, item) => {
@@ -177,14 +180,14 @@ function SecaoPrestacaoContas() {
   const saldoDoacoes = totalDoacoes - totalGasto;
 
   const categoriaPub = (cat, tipo) => {
-    const c = (cat ?? '').toLowerCase();
+    const c = normalizar(cat);
     if (tipo === 'Entrada') {
       if (c.includes('uniform')) return 'Venda de Uniformes';
       if (c.includes('evento')) return 'Eventos Beneficentes';
       return 'Doações';
     } else {
       if (c.includes('cozinha')) return 'Alimentação';
-      if (c.includes('material') || c.includes('celia') || c.includes('célia')) return 'Material Escolar e Manutenção';
+      if (c.includes('material') || c.includes('celia')) return 'Material Escolar e Manutenção';
       if (c.includes('funcionari')) return 'Funcionários';
       if (c.includes('evento')) return 'Eventos';
       return 'Outros';
