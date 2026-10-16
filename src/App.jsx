@@ -115,6 +115,37 @@ function fmt(valor) {
   return Number(valor ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+// Prestação de contas é pública: só valores realizados e categorias genéricas.
+// Nenhum nome, descrição ou plano de contas interno chega à tela.
+const STATUS_REALIZADO = ['Pago', 'Confirmado', 'Concluído'];
+
+const normalizar = (txt) => (txt ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+function categoriaPub(cat, tipo) {
+  const c = normalizar(cat);
+  if (tipo === 'Entrada') {
+    if (c.includes('uniform')) return 'Venda de Uniformes';
+    if (c.includes('evento')) return 'Eventos Beneficentes';
+    return 'Doações';
+  }
+  if (c.includes('funcionari') || c.includes('salario') || c.includes('folha')) return 'Funcionários';
+  if (c.includes('cozinha') || c.includes('aliment')) return 'Alimentação';
+  if (c.includes('material') || c.includes('celia')) return 'Material Escolar e Manutenção';
+  if (c.includes('evento')) return 'Eventos';
+  return 'Outros';
+}
+
+// Reduz cada lançamento a { data, tipo, categoria genérica, valor }. Descarta pendentes
+// (salário a pagar não é dinheiro gasto) e tira a data dos pagamentos a funcionários.
+function lancamentosPublicos(movimentacoes) {
+  return (movimentacoes ?? [])
+    .filter(m => (m.tipo === 'Entrada' || m.tipo === 'Saída') && (!m.status || STATUS_REALIZADO.includes(m.status)))
+    .map(m => {
+      const categoria = categoriaPub(m.categoria, m.tipo);
+      return { data: categoria === 'Funcionários' ? null : m.data, tipo: m.tipo, categoria, valor: Number(m.valor ?? 0) };
+    });
+}
+
 const MESES_NOME = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
 function SecaoPrestacaoContas() {
@@ -137,10 +168,8 @@ function SecaoPrestacaoContas() {
       });
   }, [mesSelecionado]);
 
-  // Sem acento: a categoria "Adiantamentos a Funcionários" (com á) escapava do filtro
-  // e expunha nome de funcionário no extrato público.
-  const normalizar = (txt) => (txt ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const ehFuncionarios = (cat) => normalizar(cat).includes('funcionari');
+  const movs = lancamentosPublicos(dados?.movimentacoes);
+  const ehFuncionarios = (cat) => cat === 'Funcionários';
 
   const agrupar = (lista, keyFn, valFn) =>
     Object.values(lista.reduce((acc, item) => {
@@ -153,20 +182,20 @@ function SecaoPrestacaoContas() {
   // Entradas: só tipo "Entrada" (dinheiro real recebido)
   // tipo "Receita" = recuperação de adiantamento/folha = contábil interno, não entra no DRE público
   const receitas = agrupar(
-    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Entrada'),
+    movs.filter(m => m.tipo === 'Entrada'),
     m => m.categoria,
     m => m.valor
   );
 
   // Saídas detalhadas (sem funcionários), agrupadas por categoria
   const despesasDetalhe = agrupar(
-    (dados?.movimentacoes ?? []).filter(m => m.tipo === 'Saída' && !ehFuncionarios(m.categoria)),
+    movs.filter(m => m.tipo === 'Saída' && !ehFuncionarios(m.categoria)),
     m => m.categoria,
     m => m.valor
   );
 
   // Funcionários: consolidado único
-  const totalFuncionarios = (dados?.movimentacoes ?? [])
+  const totalFuncionarios = movs
     .filter(m => m.tipo === 'Saída' && ehFuncionarios(m.categoria))
     .reduce((s, m) => s + Number(m.valor ?? 0), 0);
 
@@ -179,21 +208,6 @@ function SecaoPrestacaoContas() {
   const totalGasto = despesas.reduce((s, m) => s + Number(m.valor ?? 0), 0);
   const saldoDoacoes = totalDoacoes - totalGasto;
 
-  const categoriaPub = (cat, tipo) => {
-    const c = normalizar(cat);
-    if (tipo === 'Entrada') {
-      if (c.includes('uniform')) return 'Venda de Uniformes';
-      if (c.includes('evento')) return 'Eventos Beneficentes';
-      return 'Doações';
-    } else {
-      if (c.includes('cozinha')) return 'Alimentação';
-      if (c.includes('material') || c.includes('celia')) return 'Material Escolar e Manutenção';
-      if (c.includes('funcionari')) return 'Funcionários';
-      if (c.includes('evento')) return 'Eventos';
-      return 'Outros';
-    }
-  };
-
   const agruparPub = (lista, tipo) =>
     Object.entries(
       lista.filter(m => m.tipo === tipo).reduce((acc, m) => {
@@ -205,8 +219,8 @@ function SecaoPrestacaoContas() {
     .map(([categoria, valor]) => ({ categoria, valor }))
     .sort((a, b) => b.valor - a.valor);
 
-  const entradasPub = agruparPub(dados?.movimentacoes ?? [], 'Entrada');
-  const saidasPub   = agruparPub(dados?.movimentacoes ?? [], 'Saída');
+  const entradasPub = agruparPub(movs, 'Entrada');
+  const saidasPub   = agruparPub(movs, 'Saída');
 
   return (
     <section id="transparencia" className="py-24 bg-[#2D1B4D] px-4 md:px-8 relative overflow-hidden">
@@ -398,7 +412,7 @@ function SecaoPrestacaoContas() {
 
             {/* Aba Extrato */}
             {abaAtiva === 'extrato' && (() => {
-              const linhasIndividuais = (dados.movimentacoes ?? [])
+              const linhasIndividuais = movs
                 .filter(m => m.tipo === 'Entrada' || (m.tipo === 'Saída' && !ehFuncionarios(m.categoria)))
                 .sort((a, b) => (b.data ?? '').localeCompare(a.data ?? ''));
               const linhaFuncionarios = totalFuncionarios > 0
@@ -408,18 +422,13 @@ function SecaoPrestacaoContas() {
 
               function exportarCSV() {
                 const mesLabel = `${MESES_NOME[parseInt(mesSelecionado.split('-')[1], 10) - 1]}-${mesSelecionado.split('-')[0]}`;
-                const cabecalho = 'Data;Descrição;Categoria;Tipo;Valor';
-                const rows = linhas.map(m => {
-                  const catPub = categoriaPub(m.categoria, m.tipo);
-                  const ehPessoal = m.tipo === 'Entrada' && catPub === 'Doações';
-                  return [
-                    m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—',
-                    `"${ehPessoal ? 'Contribuição Voluntária' : (m.descricao ?? '').replace(/"/g, '""')}"`,
-                    `"${ehPessoal ? 'Doações' : catPub}"`,
-                    m.tipo === 'Entrada' ? 'Entrada' : 'Saída',
-                    Number(m.valor ?? 0).toFixed(2).replace('.', ','),
-                  ].join(';');
-                });
+                const cabecalho = 'Data;Categoria;Tipo;Valor';
+                const rows = linhas.map(m => [
+                  m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—',
+                  `"${m.descricao ?? m.categoria}"`,
+                  m.tipo,
+                  Number(m.valor ?? 0).toFixed(2).replace('.', ','),
+                ].join(';'));
                 const csv = '﻿' + [cabecalho, ...rows].join('\n');
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
@@ -443,7 +452,7 @@ function SecaoPrestacaoContas() {
                       <thead>
                         <tr className="border-b border-white/10">
                           <th className="text-left px-4 md:px-6 py-4 text-purple-300/70 font-black uppercase tracking-widest text-xs whitespace-nowrap">Data</th>
-                          <th className="text-left px-4 md:px-6 py-4 text-purple-300/70 font-black uppercase tracking-widest text-xs">Doador / Descrição</th>
+                          <th className="text-left px-4 md:px-6 py-4 text-purple-300/70 font-black uppercase tracking-widest text-xs">Categoria</th>
                           <th className="text-right px-4 md:px-6 py-4 text-purple-300/70 font-black uppercase tracking-widest text-xs">Valor</th>
                         </tr>
                       </thead>
@@ -455,20 +464,8 @@ function SecaoPrestacaoContas() {
                               <td className="px-4 md:px-6 py-3 text-purple-200/70 font-mono tabular-nums text-xs whitespace-nowrap">
                                 {m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
                               </td>
-                              <td className="px-4 md:px-6 py-3">
-                                {(() => {
-                                  const catPub = categoriaPub(m.categoria, m.tipo);
-                                  const ehPessoal = m.tipo === 'Entrada' &&
-                                    (catPub === 'Doações' || catPub === 'Contribuições da Diretoria');
-                                  const nome = ehPessoal ? 'Contribuição Voluntária' : (m.descricao || '—');
-                                  const detalhe = ehPessoal ? null : m.detalhes;
-                                  return (
-                                    <>
-                                      <span className="text-purple-100 font-bold">{nome}</span>
-                                      {detalhe && <span className="text-purple-300/80 font-normal"> | {detalhe}</span>}
-                                    </>
-                                  );
-                                })()}
+                              <td className="px-4 md:px-6 py-3 text-purple-100 font-bold">
+                                {m.descricao ?? m.categoria}
                               </td>
                               <td className={`px-4 md:px-6 py-3 font-black text-right whitespace-nowrap tabular-nums ${isEntrada ? 'text-green-400' : 'text-red-400'}`}>
                                 {isEntrada ? '+' : '-'}{fmt(m.valor)}
