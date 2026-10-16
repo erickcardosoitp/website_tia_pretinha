@@ -91,7 +91,6 @@ const fotoHero = fotosHero[0];
 
 const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
-const LINK_APRESENTACAO = 'https://drive.google.com/file/d/1EXb3z0h_vGt2mDAJ__9CbDZBzRF8pEXu/view?usp=sharing';
 const ULTIMO_MES_PUBLICADO = '2026-08'; // atualizar ao fechar cada mês
 
 function fmt(valor) {
@@ -204,16 +203,6 @@ function SecaoPrestacaoContas() {
             <p className="mt-4 text-purple-200/60 text-base uppercase font-black tracking-widest">
               Fechamento · {MESES_NOME[parseInt(mesSelecionado.split('-')[1], 10) - 1]} / {mesSelecionado.split('-')[0]}
             </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <a
-              href={LINK_APRESENTACAO}
-              target="_blank"
-              rel="noreferrer"
-              className="bg-yellow-400 text-purple-950 px-7 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white transition-colors shadow-xl shadow-yellow-400/20 text-center"
-            >
-              Ver Apresentação Completa →
-            </a>
           </div>
         </motion.div>
 
