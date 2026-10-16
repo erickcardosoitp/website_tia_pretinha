@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Variantes de animação reutilizadas nas seções (scroll reveal)
@@ -91,7 +91,24 @@ const fotoHero = fotosHero[0];
 
 const API_BASE = 'https://api.itp.institutotiapretinha.org/api';
 
-const LINK_APRESENTACAO = 'https://drive.google.com/file/d/1EXb3z0h_vGt2mDAJ__9CbDZBzRF8pEXu/view?usp=sharing';
+const CHAVE_PIX = '21965540576';
+const CHAVE_PIX_EXIBICAO = '(21) 96554-0576';
+
+// Seções da página: ordem do menu, rótulo do menu e título da aba do navegador
+const SECOES = [
+  { id: 'inicio', label: 'Início', titulo: 'Início' },
+  { id: 'sobre-nos', label: 'Sobre Nós', titulo: 'Sobre Nós' },
+  { id: 'projetos', label: 'Projetos', titulo: 'Projetos' },
+  { id: 'maos-que-acolhem', label: 'Mãos Que Acolhem', titulo: 'Mãos Que Acolhem' },
+  { id: 'acervo', label: 'Acervo', titulo: 'Acervo' },
+  { id: 'transparencia', label: 'Transparência', titulo: 'Transparência' },
+  { id: 'suporte', label: 'Suporte', titulo: 'Suporte' },
+  { id: 'matricule-se', label: 'Matricule-se', titulo: 'Matricule-se' },
+  { id: 'como-ajudar', label: 'Como Ajudar', titulo: 'Ajuda' },
+  { id: 'parceiros', label: 'Parceiros', titulo: 'Parceiros' },
+  { id: 'contato', label: 'Contato', titulo: 'Contato' },
+];
+
 const ULTIMO_MES_PUBLICADO = '2026-08'; // atualizar ao fechar cada mês
 
 function fmt(valor) {
@@ -205,16 +222,6 @@ function SecaoPrestacaoContas() {
               Fechamento · {MESES_NOME[parseInt(mesSelecionado.split('-')[1], 10) - 1]} / {mesSelecionado.split('-')[0]}
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <a
-              href={LINK_APRESENTACAO}
-              target="_blank"
-              rel="noreferrer"
-              className="bg-yellow-400 text-purple-950 px-7 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white transition-colors shadow-xl shadow-yellow-400/20 text-center"
-            >
-              Ver Apresentação Completa →
-            </a>
-          </div>
         </motion.div>
 
         {/* Filtro de meses */}
@@ -228,7 +235,8 @@ function SecaoPrestacaoContas() {
                   <button
                     key={pm.mes}
                     onClick={() => setMesSelecionado(pm.mes)}
-                    className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${ativo ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/60 hover:bg-white/10'}`}
+                    aria-pressed={ativo}
+                    className={`px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-colors ${ativo ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/80 hover:bg-white/10'}`}
                   >
                     {label}
                   </button>
@@ -238,7 +246,7 @@ function SecaoPrestacaoContas() {
         )}
 
         {carregando && (
-          <div className="text-center py-20 text-purple-300/50 font-black tracking-widest uppercase">Carregando dados...</div>
+          <div role="status" className="text-center py-20 text-purple-300/70 font-black tracking-widest uppercase">Carregando dados…</div>
         )}
 
         {!carregando && mesSelecionado > ULTIMO_MES_PUBLICADO && (
@@ -255,17 +263,17 @@ function SecaoPrestacaoContas() {
               {[
                 { label: 'Alunos Ativos', valor: dados.resumo.alunosAtivos, unidade: 'alunos', cor: 'text-yellow-400' },
                 { label: 'Cursos', valor: dados.resumo.cursosAtivos, unidade: 'ativos', cor: 'text-purple-300' },
-                { label: 'Voluntários', valor: dados.resumo.voluntarios, unidade: 'pessoas', cor: 'text-blue-400' },
-                { label: 'Saldo do Mês', valor: fmt(saldoDoacoes), unidade: '', cor: saldoDoacoes >= 0 ? 'text-green-400' : 'text-red-400' },
+                { label: 'Voluntários', valor: dados.resumo.voluntarios, unidade: 'pessoas', cor: 'text-blue-400', largo: true },
+                { label: 'Saldo do Mês', valor: fmt(saldoDoacoes), unidade: '', cor: saldoDoacoes >= 0 ? 'text-green-400' : 'text-red-400', largo: true },
               ].map((k, i) => (
                 <motion.div
-                  key={i} className="bg-[#1F1235] rounded-[2rem] p-6 border border-white/5"
+                  key={i} className={`bg-[#1F1235] rounded-[2rem] p-5 md:p-6 border border-white/5 min-w-0 ${k.largo ? 'col-span-2 md:col-span-1' : ''}`}
                   initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
                   transition={{ duration: 0.7, ease: 'easeOut', delay: i * 0.08 }}
                 >
-                  <p className="text-purple-200/50 text-xs uppercase font-black tracking-widest mb-2">{k.label}</p>
-                  <p className={`text-lg md:text-3xl font-black leading-tight break-all ${k.cor}`}>{k.valor}</p>
-                  {k.unidade && <p className="text-purple-200/30 text-xs mt-1 uppercase font-bold">{k.unidade}</p>}
+                  <p className="text-purple-200/70 text-xs uppercase font-black tracking-widest mb-2">{k.label}</p>
+                  <p className={`text-2xl md:text-2xl lg:text-3xl font-black leading-tight whitespace-nowrap tabular-nums ${k.cor}`}>{k.valor}</p>
+                  {k.unidade && <p className="text-purple-200/60 text-xs mt-1 uppercase font-bold">{k.unidade}</p>}
                 </motion.div>
               ))}
             </div>
@@ -273,19 +281,19 @@ function SecaoPrestacaoContas() {
             {/* Custo por Beneficiário */}
             {dados.resumo.totalInvestido > 0 && (
               <div className="bg-[#1F1235] rounded-[2rem] border border-white/5 p-6 md:p-7 mb-10">
-                <p className="text-purple-300/50 text-xs uppercase font-black tracking-widest mb-5">Custo por Beneficiário</p>
-                <div className="grid grid-cols-3 gap-3">
+                <p className="text-purple-300/70 text-xs uppercase font-black tracking-widest mb-5">Custo por Beneficiário</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-3">
                   <div className="text-center">
-                    <p className="text-purple-200/40 text-[9px] md:text-[10px] uppercase font-black tracking-tight md:tracking-widest mb-1 leading-tight">Total Investido</p>
-                    <p className="text-base md:text-xl font-black text-red-400 break-all">{fmt(dados.resumo.totalInvestido)}</p>
+                    <p className="text-purple-200/70 text-[11px] uppercase font-black tracking-widest mb-1 leading-tight">Total Investido</p>
+                    <p className="text-xl font-black text-red-400 whitespace-nowrap tabular-nums">{fmt(dados.resumo.totalInvestido)}</p>
                   </div>
-                  <div className="text-center border-x border-white/5">
-                    <p className="text-purple-200/40 text-[9px] md:text-[10px] uppercase font-black tracking-tight md:tracking-widest mb-1 leading-tight">Beneficiários</p>
-                    <p className="text-base md:text-xl font-black text-blue-400">{dados.resumo.beneficiarios}</p>
+                  <div className="text-center border-y sm:border-y-0 sm:border-x border-white/5 py-4 sm:py-0">
+                    <p className="text-purple-200/70 text-[11px] uppercase font-black tracking-widest mb-1 leading-tight">Beneficiários</p>
+                    <p className="text-xl font-black text-blue-400 whitespace-nowrap tabular-nums">{dados.resumo.beneficiarios}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-purple-200/40 text-[9px] md:text-[10px] uppercase font-black tracking-tight md:tracking-widest mb-1 leading-tight">Custo Médio</p>
-                    <p className="text-base md:text-xl font-black text-purple-300 break-all">{fmt(dados.resumo.custoMedio)}</p>
+                    <p className="text-purple-200/70 text-[11px] uppercase font-black tracking-widest mb-1 leading-tight">Custo Médio</p>
+                    <p className="text-xl font-black text-purple-300 whitespace-nowrap tabular-nums">{fmt(dados.resumo.custoMedio)}</p>
                   </div>
                 </div>
               </div>
@@ -297,7 +305,8 @@ function SecaoPrestacaoContas() {
                 <button
                   key={k}
                   onClick={() => setAbaAtiva(k)}
-                  className={`px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${abaAtiva === k ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/60 hover:bg-white/10'}`}
+                  aria-pressed={abaAtiva === k}
+                  className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-colors ${abaAtiva === k ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/80 hover:bg-white/10'}`}
                 >
                   {label}
                 </button>
@@ -310,13 +319,13 @@ function SecaoPrestacaoContas() {
                 {/* Entradas */}
                 <div className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5">
                   <h3 className="text-green-400 font-black uppercase tracking-widest text-sm mb-6">Entradas</h3>
-                  {entradasPub.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
+                  {entradasPub.length === 0 && <p className="text-purple-300/70 text-sm">Nenhuma entrada registrada neste mês.</p>}
                   <div className="space-y-3">
                     {entradasPub.map((c, i) => (
                       <div key={i}>
                         <div className="flex justify-between text-sm mb-1 gap-2">
                           <span className="text-purple-100 font-bold truncate min-w-0">{c.categoria}</span>
-                          <span className="text-green-400 font-black whitespace-nowrap flex-shrink-0">{fmt(c.valor)}</span>
+                          <span className="text-green-400 font-black whitespace-nowrap flex-shrink-0 tabular-nums">{fmt(c.valor)}</span>
                         </div>
                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-green-500/60 rounded-full" style={{ width: `${(c.valor / (totalDoacoes || 1)) * 100}%` }} />
@@ -350,13 +359,13 @@ function SecaoPrestacaoContas() {
                 {/* Saídas */}
                 <div className="bg-[#1F1235] rounded-[2rem] p-8 border border-white/5">
                   <h3 className="text-red-400 font-black uppercase tracking-widest text-sm mb-6">Saídas</h3>
-                  {saidasPub.length === 0 && <p className="text-purple-300/40 text-sm">Nenhum dado</p>}
+                  {saidasPub.length === 0 && <p className="text-purple-300/70 text-sm">Nenhuma saída registrada neste mês.</p>}
                   <div className="space-y-3">
                     {saidasPub.map((c, i) => (
                       <div key={i}>
                         <div className="flex justify-between text-sm mb-1 gap-2">
                           <span className="text-purple-100 font-bold truncate min-w-0">{c.categoria}</span>
-                          <span className="text-red-400 font-black whitespace-nowrap flex-shrink-0">{fmt(c.valor)}</span>
+                          <span className="text-red-400 font-black whitespace-nowrap flex-shrink-0 tabular-nums">{fmt(c.valor)}</span>
                         </div>
                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-red-500/60 rounded-full" style={{ width: `${(c.valor / (totalGasto || 1)) * 100}%` }} />
@@ -370,15 +379,15 @@ function SecaoPrestacaoContas() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-[#1F1235] rounded-[2rem] p-6 border border-green-500/20 text-center">
                     <p className="text-green-400/70 text-xs uppercase font-black tracking-widest mb-2">Total Arrecadado</p>
-                    <p className="text-2xl font-black text-green-400">{fmt(totalDoacoes)}</p>
+                    <p className="text-2xl font-black text-green-400 tabular-nums">{fmt(totalDoacoes)}</p>
                   </div>
                   <div className="bg-[#1F1235] rounded-[2rem] p-6 border border-red-500/20 text-center">
                     <p className="text-red-400/70 text-xs uppercase font-black tracking-widest mb-2">Total Gasto</p>
-                    <p className="text-2xl font-black text-red-400">{fmt(totalGasto)}</p>
+                    <p className="text-2xl font-black text-red-400 tabular-nums">{fmt(totalGasto)}</p>
                   </div>
                   <div className={`bg-[#1F1235] rounded-[2rem] p-6 border ${saldoDoacoes >= 0 ? 'border-yellow-400/30' : 'border-red-500/20'} text-center`}>
                     <p className="text-yellow-400/70 text-xs uppercase font-black tracking-widest mb-2">Saldo do Mês</p>
-                    <p className={`text-2xl font-black ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(saldoDoacoes)}</p>
+                    <p className={`text-2xl font-black tabular-nums ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>{fmt(saldoDoacoes)}</p>
                   </div>
                 </div>
               </div>
@@ -430,9 +439,9 @@ function SecaoPrestacaoContas() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-white/10">
-                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs whitespace-nowrap">Data</th>
-                          <th className="text-left px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Doador / Descrição</th>
-                          <th className="text-right px-6 py-4 text-purple-300/50 font-black uppercase tracking-widest text-xs">Valor</th>
+                          <th className="text-left px-4 md:px-6 py-4 text-purple-300/70 font-black uppercase tracking-widest text-xs whitespace-nowrap">Data</th>
+                          <th className="text-left px-4 md:px-6 py-4 text-purple-300/70 font-black uppercase tracking-widest text-xs">Doador / Descrição</th>
+                          <th className="text-right px-4 md:px-6 py-4 text-purple-300/70 font-black uppercase tracking-widest text-xs">Valor</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -440,10 +449,10 @@ function SecaoPrestacaoContas() {
                           const isEntrada = m.tipo === 'Entrada';
                           return (
                             <tr key={i} className="border-b border-white/5 hover:bg-white/3 transition-colors">
-                              <td className="px-6 py-3 text-purple-200/60 font-mono text-xs whitespace-nowrap">
+                              <td className="px-4 md:px-6 py-3 text-purple-200/70 font-mono tabular-nums text-xs whitespace-nowrap">
                                 {m.data ? new Date(m.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
                               </td>
-                              <td className="px-6 py-3">
+                              <td className="px-4 md:px-6 py-3">
                                 {(() => {
                                   const catPub = categoriaPub(m.categoria, m.tipo);
                                   const ehPessoal = m.tipo === 'Entrada' &&
@@ -453,25 +462,25 @@ function SecaoPrestacaoContas() {
                                   return (
                                     <>
                                       <span className="text-purple-100 font-bold">{nome}</span>
-                                      {detalhe && <span className="text-purple-400/60 font-normal"> | {detalhe}</span>}
+                                      {detalhe && <span className="text-purple-300/80 font-normal"> | {detalhe}</span>}
                                     </>
                                   );
                                 })()}
                               </td>
-                              <td className={`px-6 py-3 font-black text-right whitespace-nowrap ${isEntrada ? 'text-green-400' : 'text-red-400'}`}>
+                              <td className={`px-4 md:px-6 py-3 font-black text-right whitespace-nowrap tabular-nums ${isEntrada ? 'text-green-400' : 'text-red-400'}`}>
                                 {isEntrada ? '+' : '-'}{fmt(m.valor)}
                               </td>
                             </tr>
                           );
                         })}
                         {linhas.length === 0 && (
-                          <tr><td colSpan={3} className="px-6 py-10 text-center text-purple-300/40">Nenhuma movimentação registrada</td></tr>
+                          <tr><td colSpan={3} className="px-6 py-10 text-center text-purple-300/70">Nenhuma movimentação registrada</td></tr>
                         )}
                       </tbody>
                       <tfoot>
                         <tr className="border-t-2 border-yellow-400/20 bg-yellow-400/5">
-                          <td colSpan={2} className="px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
-                          <td className={`px-6 py-4 font-black text-right text-lg ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          <td colSpan={2} className="px-4 md:px-6 py-4 font-black uppercase text-yellow-400 text-xs tracking-widest">Saldo do Período</td>
+                          <td className={`px-4 md:px-6 py-4 font-black text-right text-lg whitespace-nowrap tabular-nums ${saldoDoacoes >= 0 ? 'text-yellow-400' : 'text-red-400'}`}>
                             {fmt(saldoDoacoes)}
                           </td>
                         </tr>
@@ -486,7 +495,7 @@ function SecaoPrestacaoContas() {
 
         {!carregando && !dados && (
           <div className="text-center py-20">
-            <p className="text-purple-300/40 font-black uppercase tracking-widest">Dados indisponíveis no momento</p>
+            <p className="text-purple-300/70 font-black uppercase tracking-widest">Dados indisponíveis no momento. Tente novamente mais tarde.</p>
           </div>
         )}
 
@@ -566,7 +575,8 @@ function SecaoSuporte() {
         <div className="flex gap-2 mb-8">
           {[['abrir','Abrir Chamado'],['consultar','Consultar Chamado']].map(([id, label]) => (
             <button key={id} onClick={() => { setTab(id); setProtocolo(null); setResultados(null); setErroAbrir(''); setErroBusca(''); }}
-              className={`flex-1 py-3 rounded-xl font-black text-sm uppercase tracking-widest transition-all ${tab === id ? 'bg-yellow-400 text-purple-950' : 'bg-purple-900/50 text-purple-300 hover:bg-purple-800/50'}`}>
+              aria-pressed={tab === id}
+              className={`flex-1 py-3 px-2 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest transition-colors ${tab === id ? 'bg-yellow-400 text-purple-950' : 'bg-purple-900/50 text-purple-300 hover:bg-purple-800/50'}`}>
               {label}
             </button>
           ))}
@@ -575,44 +585,46 @@ function SecaoSuporte() {
         {/* Tab Abrir Chamado */}
         {tab === 'abrir' && (
           protocolo ? (
-            <div className="bg-green-500/20 border border-green-400 rounded-2xl p-8 text-center">
+            <div role="status" aria-live="polite" className="bg-green-500/20 border border-green-400 rounded-2xl p-8 text-center">
               <p className="text-2xl font-black text-green-400 mb-2">Chamado aberto!</p>
-              <p className="text-lg font-mono font-black text-white mb-3">{protocolo}</p>
+              <p className="text-lg font-mono font-black text-white mb-3 select-all">{protocolo}</p>
               <p className="text-purple-300 text-sm">Guarde este protocolo para consultas. Nossa equipe entrará em contato pelo WhatsApp.</p>
-              <button onClick={() => setProtocolo(null)} className="mt-6 bg-yellow-400 text-purple-950 px-8 py-3 rounded-xl font-black text-sm uppercase">Abrir novo chamado</button>
+              <button onClick={() => setProtocolo(null)} className="mt-6 bg-yellow-400 text-purple-950 px-8 py-3 rounded-xl font-black text-sm uppercase hover:bg-white transition-colors">Abrir Novo Chamado</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {[
-                { key: 'nome', label: 'Nome completo', type: 'text', required: true },
-                { key: 'email', label: 'E-mail', type: 'email', required: true },
-                { key: 'telefone', label: 'Telefone / WhatsApp', type: 'tel', required: true },
-                { key: 'nome_aluno', label: 'Nome do aluno (se aplicável)', type: 'text', required: false },
-              ].map(({ key, label, type, required }) => (
+                { key: 'nome', label: 'Nome completo', type: 'text', required: true, autoComplete: 'name', placeholder: 'Maria da Silva' },
+                { key: 'email', label: 'E-mail', type: 'email', required: true, autoComplete: 'email', placeholder: 'maria@email.com', spellCheck: false },
+                { key: 'telefone', label: 'Telefone / WhatsApp', type: 'tel', required: true, autoComplete: 'tel-national', inputMode: 'tel', placeholder: '(21) 99999-9999' },
+                { key: 'nome_aluno', label: 'Nome do aluno (se aplicável)', type: 'text', required: false, autoComplete: 'off' },
+              ].map(({ key, label, type, required, autoComplete, inputMode, placeholder, spellCheck }) => (
                 <div key={key}>
-                  <label className="block text-sm text-purple-300 mb-1">{label}{required && <span className="text-yellow-400">*</span>}</label>
-                  <input type={type} required={required} value={form[key]} onChange={e => setForm(p => ({...p, [key]: e.target.value}))}
-                    className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white placeholder-purple-500 focus:outline-none focus:border-yellow-400" />
+                  <label htmlFor={`suporte-${key}`} className="block text-sm text-purple-300 mb-1">{label}{required && <span className="text-yellow-400" aria-hidden="true">*</span>}</label>
+                  <input id={`suporte-${key}`} name={key} type={type} required={required} autoComplete={autoComplete} inputMode={inputMode}
+                    spellCheck={spellCheck} placeholder={placeholder ? `${placeholder}…` : undefined}
+                    value={form[key]} onChange={e => setForm(p => ({...p, [key]: e.target.value}))}
+                    className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-base text-white placeholder-purple-400/60 focus:outline-none focus:border-yellow-400" />
                 </div>
               ))}
               <div>
-                <label className="block text-sm text-purple-300 mb-1">Assunto<span className="text-yellow-400">*</span></label>
-                <select required value={form.assunto} onChange={e => setForm(p => ({...p, assunto: e.target.value}))}
-                  className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-400">
-                  <option value="">Selecione...</option>
+                <label htmlFor="suporte-assunto" className="block text-sm text-purple-300 mb-1">Assunto<span className="text-yellow-400" aria-hidden="true">*</span></label>
+                <select id="suporte-assunto" name="assunto" required value={form.assunto} onChange={e => setForm(p => ({...p, assunto: e.target.value}))}
+                  className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-base text-white focus:outline-none focus:border-yellow-400 [&>option]:bg-[#1a0a35] [&>option]:text-white">
+                  <option value="">Selecione…</option>
                   {['Matrícula','Financeiro','Acadêmico','Dúvida Geral','Suporte','Outro'].map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-purple-300 mb-1">Mensagem<span className="text-yellow-400">*</span></label>
-                <textarea required rows={4} value={form.mensagem} onChange={e => setForm(p => ({...p, mensagem: e.target.value}))}
-                  className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white placeholder-purple-500 focus:outline-none focus:border-yellow-400 resize-none" />
+                <label htmlFor="suporte-mensagem" className="block text-sm text-purple-300 mb-1">Mensagem<span className="text-yellow-400" aria-hidden="true">*</span></label>
+                <textarea id="suporte-mensagem" name="mensagem" required rows={4} value={form.mensagem} onChange={e => setForm(p => ({...p, mensagem: e.target.value}))}
+                  className="w-full bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-base text-white placeholder-purple-400/60 focus:outline-none focus:border-yellow-400 resize-y" />
               </div>
-              <p className="text-xs text-purple-400">📎 Caso precise enviar documentos, nossa equipe solicitará via WhatsApp após o contato.</p>
-              {erroAbrir && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">{erroAbrir}</p>}
+              <p className="text-xs text-purple-300"><span aria-hidden="true">📎</span> Caso precise enviar documentos, nossa equipe solicitará via WhatsApp após o contato.</p>
+              {erroAbrir && <p role="alert" className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">{erroAbrir}</p>}
               <button type="submit" disabled={enviando}
-                className="bg-yellow-400 text-purple-950 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                {enviando ? 'Enviando...' : 'Enviar chamado'}
+                className="bg-yellow-400 text-purple-950 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                {enviando ? 'Enviando…' : 'Enviar Chamado'}
               </button>
             </form>
           )
@@ -621,17 +633,19 @@ function SecaoSuporte() {
         {/* Tab Consultar Chamado */}
         {tab === 'consultar' && (
           <div className="flex flex-col gap-6">
-            <form onSubmit={handleBuscar} className="flex gap-3">
-              <input type="text" value={busca} onChange={e => setBusca(e.target.value)} placeholder="Protocolo (ITP-XXXXXX-XXX) ou seu nome"
-                className="flex-1 bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-white placeholder-purple-500 focus:outline-none focus:border-yellow-400" />
+            <form onSubmit={handleBuscar} className="flex flex-col sm:flex-row gap-3">
+              <label htmlFor="suporte-busca" className="sr-only">Protocolo ou nome</label>
+              <input id="suporte-busca" name="busca" type="text" autoComplete="off" spellCheck={false}
+                value={busca} onChange={e => setBusca(e.target.value)} placeholder="Protocolo (ITP-XXXXXX-XXX) ou seu nome…"
+                className="flex-1 min-w-0 bg-purple-900/50 border border-purple-700 rounded-xl px-4 py-3 text-base text-white placeholder-purple-400/60 focus:outline-none focus:border-yellow-400" />
               <button type="submit" disabled={buscando || busca.trim().length < 3}
-                className="bg-yellow-400 text-purple-950 px-6 py-3 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50">
-                {buscando ? '...' : 'Buscar'}
+                className="bg-yellow-400 text-purple-950 px-6 py-3 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                {buscando ? 'Buscando…' : 'Buscar'}
               </button>
             </form>
-            {erroBusca && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">{erroBusca}</p>}
+            {erroBusca && <p role="alert" className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">{erroBusca}</p>}
             {resultados !== null && resultados.length === 0 && (
-              <p className="text-purple-300 text-center py-6">Nenhum chamado encontrado. Verifique o protocolo ou entre em contato pelo WhatsApp.</p>
+              <p role="status" className="text-purple-300 text-center py-6">Nenhum chamado encontrado. Verifique o protocolo ou entre em contato pelo WhatsApp.</p>
             )}
             {resultados?.length > 0 && (
               <div className="overflow-x-auto rounded-2xl border border-purple-700">
@@ -668,17 +682,72 @@ function SecaoSuporte() {
   );
 }
 
+// Modal "Ver Detalhes" dos projetos: fecha com Esc/clique fora, trava a rolagem
+// do fundo e devolve o foco ao botão que abriu.
+function ModalProjeto({ projeto, onFechar }) {
+  const botaoFecharRef = useRef(null);
+
+  useEffect(() => {
+    const focoAnterior = document.activeElement;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    botaoFecharRef.current?.focus();
+    const aoTeclar = (e) => { if (e.key === 'Escape') onFechar(); };
+    document.addEventListener('keydown', aoTeclar);
+    return () => {
+      document.removeEventListener('keydown', aoTeclar);
+      document.body.style.overflow = overflowAnterior;
+      focoAnterior?.focus?.();
+    };
+  }, [onFechar]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 bg-purple-950/95 backdrop-blur-xl overscroll-contain"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onFechar}
+    >
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-projeto-titulo"
+        className="bg-white text-purple-950 max-w-2xl w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-[2rem] md:rounded-[4rem] p-6 md:p-12 relative shadow-[0_0_100px_rgba(0,0,0,0.5)]"
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          ref={botaoFecharRef}
+          onClick={onFechar}
+          aria-label="Fechar detalhes do projeto"
+          className="absolute top-4 right-4 md:top-8 md:right-10 w-11 h-11 flex items-center justify-center rounded-full text-2xl md:text-3xl font-black hover:bg-purple-100 transition-colors"
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
+        <h3 id="modal-projeto-titulo" className="text-3xl md:text-4xl font-black uppercase mb-6 tracking-tighter pr-12">{projeto.titulo}</h3>
+        <p className="text-lg md:text-xl text-slate-700 mb-10 leading-relaxed font-light italic">“{projeto.detalhe}”</p>
+        <button onClick={onFechar} className="bg-purple-700 hover:bg-purple-800 transition-colors text-white px-8 py-5 rounded-2xl font-black w-full uppercase tracking-widest shadow-lg">Fechar</button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function App() {
   const [activeSection, setActiveSection] = useState('inicio');
   const [projetoSelecionado, setProjetoSelecionado] = useState(null);
   const [fotoAtual, setFotoAtual] = useState(0);
   const [categoriaAcervo, setCategoriaAcervo] = useState(ACERVO_CATEGORIAS[0].id);
-  const [showPixToast, setShowPixToast] = useState(false);
+  const [pixToast, setPixToast] = useState(null); // null | 'copiada' | 'falhou'
   const [menuAberto, setMenuAberto] = useState(false);
+  // Estável para o efeito do modal não reexecutar (e roubar o foco) a cada render do App
+  const fecharProjeto = useCallback(() => setProjetoSelecionado(null), []);
 
 
   // --- LÓGICA DO ACERVO ---
   const fotosAcervo = acervoPorCategoria[categoriaAcervo] || [];
+  const categoriaAcervoLabel = ACERVO_CATEGORIAS.find(c => c.id === categoriaAcervo)?.label ?? '';
   const selecionarCategoriaAcervo = (id) => {
     setCategoriaAcervo(id);
     setFotoAtual(0);
@@ -693,34 +762,49 @@ function App() {
 
   // --- TÍTULO DA PÁGINA ---
   useEffect(() => {
-    const nomesSessoes = {
-      'inicio': 'Início', 'sobre-nos': 'Sobre Nós', 'projetos': 'Projetos',
-      'maos-que-acolhem': 'Mãos Que Acolhem', 'acervo': 'Acervo', 'transparencia': 'Transparência', 'suporte': 'Suporte', 'matricule-se': 'Matricule-se', 'como-ajudar': 'Ajuda', 'parceiros': 'Parceiros', 'contato': 'Contato'
-    };
-    document.title = `Instituto Tia Pretinha | ${nomesSessoes[activeSection] || 'Bem-vindo'}`;
+    document.title = `Instituto Tia Pretinha | ${SECOES.find(s => s.id === activeSection)?.titulo || 'Bem-vindo'}`;
   }, [activeSection]);
 
-  // --- DETECÇÃO DE SCROLL ---
+  // --- SEÇÃO ATIVA NO MENU ---
+  // IntersectionObserver em vez de listener de scroll: não lê layout a cada frame (travava no mobile).
+  // A faixa de detecção fica logo abaixo da navbar, então a seção ativa é a que está no topo da tela.
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['inicio', 'sobre-nos', 'projetos', 'maos-que-acolhem', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'];
-      const scrollPosition = window.scrollY + 250;
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element && scrollPosition >= element.offsetTop && scrollPosition < element.offsetTop + element.offsetHeight) {
-          setActiveSection(section);
-          break;
-        }
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { rootMargin: '-120px 0px -60% 0px' }
+    );
+    SECOES.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
   }, []);
 
-  const copiarChavePix = () => {
-    navigator.clipboard.writeText("21965540576");
-    setShowPixToast(true);
-    setTimeout(() => setShowPixToast(false), 3000);
+  // Menu mobile: o fechamento do menu cancela a rolagem suave nativa da âncora,
+  // então fecha primeiro e rola no frame seguinte.
+  const irParaSecaoMobile = (e, id) => {
+    e.preventDefault();
+    setMenuAberto(false);
+    requestAnimationFrame(() => {
+      const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById(id)?.scrollIntoView({ behavior: reduzir ? 'auto' : 'smooth' });
+      history.replaceState(null, '', `#${id}`);
+    });
+  };
+
+  const copiarChavePix = async () => {
+    try {
+      await navigator.clipboard.writeText(CHAVE_PIX);
+      setPixToast('copiada');
+    } catch {
+      // Navegadores antigos/WebView sem permissão de clipboard: mostra a chave para copiar manualmente
+      setPixToast('falhou');
+    }
+    setTimeout(() => setPixToast(null), 4000);
   }
 
   // --- LISTA DE PROJETOS COM NOMES DE ARQUIVOS CORRIGIDOS ---
@@ -797,12 +881,14 @@ function App() {
 {/* BOTÃO FLUTUANTE - MARKETPLACE */}
 <a
   href="/marketplace"
-  className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[200] w-14 h-14 md:w-16 md:h-16 bg-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center hover:scale-110 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35)] active:scale-95 transition-all duration-300 group"
-  title="Marketplace Instituto Tia Pretinha"
+  className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-[calc(1.5rem+env(safe-area-inset-right))] md:bottom-8 md:right-8 z-[150] w-14 h-14 md:w-16 md:h-16 bg-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center hover:scale-110 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35)] active:scale-95 transition-[transform,box-shadow] duration-300 group"
+  title="Loja Oficial do Instituto Tia Pretinha"
+  aria-label="Abrir a Loja Oficial do Instituto Tia Pretinha"
 >
   {/* Ícone de carrinho SVG - preto */}
   <svg
     xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
     className="w-7 h-7 text-purple-950 group-hover:scale-110 transition-transform duration-300"
     fill="none"
     viewBox="0 0 24 24"
@@ -817,41 +903,56 @@ function App() {
   </svg>
 
   {/* Pulsação sutil de fundo */}
-  <span className="absolute inset-0 rounded-full bg-yellow-400/20 animate-ping opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+  <span aria-hidden="true" className="absolute inset-0 rounded-full bg-yellow-400/20 animate-ping opacity-0 group-hover:opacity-100 transition-opacity duration-300 motion-reduce:hidden"></span>
 </a>
 
       {/* TOAST PIX */}
-      <div className={`fixed bottom-24 right-4 md:bottom-10 md:right-10 z-[300] transition-all duration-500 transform ${showPixToast ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
-        <div className="bg-yellow-400 text-purple-950 px-5 py-3 md:px-8 md:py-4 rounded-2xl font-black shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-3">
-          <span className="text-2xl">💜</span>
-          <div className="flex flex-col">
-            <span className="text-xs uppercase tracking-widest opacity-70">Sucesso</span>
-            <span className="uppercase italic">Chave PIX Copiada!</span>
+      <div
+        role="status"
+        aria-live="polite"
+        className={`fixed bottom-24 right-4 left-4 sm:left-auto md:bottom-10 md:right-10 z-[300] transition-[transform,opacity] duration-500 ${pixToast ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}
+      >
+        {pixToast && (
+          <div className="bg-yellow-400 text-purple-950 px-5 py-3 md:px-8 md:py-4 rounded-2xl font-black shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-3">
+            <span className="text-2xl" aria-hidden="true">💜</span>
+            {pixToast === 'copiada' ? (
+              <div className="flex flex-col">
+                <span className="text-xs uppercase tracking-widest opacity-70">Sucesso</span>
+                <span className="uppercase italic">Chave PIX Copiada!</span>
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                <span className="text-xs uppercase tracking-widest opacity-70">Não foi possível copiar</span>
+                <span className="italic">Chave PIX (telefone): <span className="select-all whitespace-nowrap tabular-nums">{CHAVE_PIX_EXIBICAO}</span></span>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
 
       {/* NAVBAR */}
-      <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/90 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4 shadow-lg">
+      <nav className="fixed top-0 w-full z-[100] bg-[#1F1235]/90 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4 pt-[max(1rem,env(safe-area-inset-top))] shadow-lg">
         <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
-          <img
-            src="/png_instituto.jpg"
-            alt="Logo"
-            className="h-10 md:h-16 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
-            onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
-          />
+          <a href="#inicio" aria-label="Instituto Tia Pretinha — voltar ao início" className="flex-shrink-0 rounded-lg">
+            <img
+              src="/png_instituto.jpg"
+              alt="Instituto Tia Pretinha"
+              className="h-10 md:h-16 hover:scale-105 transition-transform"
+            />
+          </a>
 
-          <div className="hidden lg:flex items-center gap-5 py-2">
-            {['inicio', 'sobre-nos', 'projetos', 'maos-que-acolhem', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
+          <div className="hidden xl:flex items-center gap-4 2xl:gap-5 py-2 min-w-0">
+            {SECOES.map(({ id, label }) => (
               <a
-                key={item}
-                href={`#${item}`}
-                className={`text-[10px] font-black uppercase tracking-widest relative py-2 whitespace-nowrap flex-shrink-0 transition-colors ${
-                  activeSection === item ? 'text-yellow-400' : 'text-purple-200 hover:text-white'
+                key={id}
+                href={`#${id}`}
+                aria-current={activeSection === id ? 'true' : undefined}
+                className={`text-[10px] 2xl:text-[11px] font-black uppercase tracking-widest relative py-2 whitespace-nowrap flex-shrink-0 transition-colors ${
+                  activeSection === id ? 'text-yellow-400' : 'text-purple-200 hover:text-white'
                 }`}
               >
-                {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item === 'maos-que-acolhem' ? 'Mãos Que Acolhem' : item.replace('-', ' ')}
-                {activeSection === item && (
+                {label}
+                {activeSection === id && (
                   <motion.span layoutId="nav-underline" className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-full" transition={{ type: 'spring', stiffness: 380, damping: 30 }} />
                 )}
               </a>
@@ -866,7 +967,7 @@ function App() {
               onClick={() => setMenuAberto(v => !v)}
               aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={menuAberto}
-              className="lg:hidden flex flex-col justify-center items-center gap-[5px] w-10 h-10 flex-shrink-0"
+              className="xl:hidden flex flex-col justify-center items-center gap-[5px] w-11 h-11 flex-shrink-0"
             >
               <span className={`block w-6 h-0.5 bg-white rounded-full transition-all ${menuAberto ? 'rotate-45 translate-y-[7px]' : ''}`}></span>
               <span className={`block w-6 h-0.5 bg-white rounded-full transition-all ${menuAberto ? 'opacity-0' : ''}`}></span>
@@ -878,23 +979,24 @@ function App() {
         <AnimatePresence>
           {menuAberto && (
             <motion.div
-              className="lg:hidden overflow-hidden max-w-7xl mx-auto"
+              className="xl:hidden overflow-hidden max-w-7xl mx-auto"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeInOut' }}
             >
-              <div className="mt-4 pb-2 flex flex-col gap-1">
-                {['inicio', 'sobre-nos', 'projetos', 'maos-que-acolhem', 'acervo', 'transparencia', 'suporte', 'matricule-se', 'como-ajudar', 'parceiros', 'contato'].map((item) => (
+              <div className="mt-4 pb-2 flex flex-col gap-1 max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain">
+                {SECOES.map(({ id, label }) => (
                   <a
-                    key={item}
-                    href={`#${item}`}
-                    onClick={() => setMenuAberto(false)}
+                    key={id}
+                    href={`#${id}`}
+                    onClick={(e) => irParaSecaoMobile(e, id)}
+                    aria-current={activeSection === id ? 'true' : undefined}
                     className={`text-sm font-black uppercase tracking-widest py-3 px-2 rounded-lg transition-colors ${
-                      activeSection === item ? 'text-yellow-400 bg-white/5' : 'text-purple-200 hover:text-white hover:bg-white/5'
+                      activeSection === id ? 'text-yellow-400 bg-white/5' : 'text-purple-200 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    {item === 'transparencia' ? 'Transparência' : item === 'matricule-se' ? 'Matricule-se' : item === 'maos-que-acolhem' ? 'Mãos Que Acolhem' : item.replace('-', ' ')}
+                    {label}
                   </a>
                 ))}
               </div>
@@ -904,7 +1006,7 @@ function App() {
       </nav>
 
       {/* HERO */}
-      <header id="inicio" className="relative min-h-screen flex items-center justify-center pt-20 px-4 md:px-8 text-center overflow-hidden">
+      <header id="inicio" className="relative min-h-[100svh] flex items-center justify-center pt-20 px-4 md:px-8 text-center overflow-hidden">
         {fotoHero && (
           <div className="absolute inset-0 z-0 bg-[#1F1235] overflow-hidden">
             <motion.img
@@ -1057,15 +1159,16 @@ function App() {
             <h3 className="text-2xl font-black text-yellow-400 uppercase leading-none mb-2">
               {p.titulo}
             </h3>
-            <p className="text-[10px] font-black text-purple-400 mb-4 uppercase">
+            <p className="text-[11px] font-black text-purple-300 mb-4 uppercase">
               {['EM BREVE!', 'A confirmar', 'Equipe de Professores'].includes(p.prof) ? p.prof : `Prof. ${p.prof}`}
             </p>
             <p className="text-sm text-purple-100/70 mb-8 leading-relaxed">
               {p.desc}
             </p>
-            <button 
-              onClick={() => setProjetoSelecionado(p)} 
-              className="mt-auto bg-purple-700/30 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-purple-900 transition-all shadow-lg active:scale-95"
+            <button
+              onClick={() => setProjetoSelecionado(p)}
+              aria-label={`Ver detalhes de ${p.titulo}`}
+              className="mt-auto bg-purple-700/30 py-4 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-purple-900 transition-[color,background-color,transform] shadow-lg active:scale-95"
             >
               Ver Detalhes
             </button>
@@ -1099,7 +1202,7 @@ function App() {
             >
               {(acervoPorCategoria['maos-que-acolhem'] || []).map((src, i) => (
                 <div key={i} className={`overflow-hidden rounded-[1.5rem] border-2 border-white/10 shadow-xl ${i === 0 ? 'col-span-3 aspect-[16/9]' : 'aspect-square'}`}>
-                  <img src={src} alt={`Mãos Que Acolhem ${i + 1}`} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  <img src={src} alt={`Mãos Que Acolhem — foto ${i + 1}`} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 </div>
               ))}
             </motion.div>
@@ -1195,10 +1298,11 @@ function App() {
               <motion.button
                 key={cat.id}
                 onClick={() => selecionarCategoriaAcervo(cat.id)}
+                aria-pressed={categoriaAcervo === cat.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-colors ${
-                  categoriaAcervo === cat.id ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/60 hover:bg-white/10'
+                className={`px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-colors ${
+                  categoriaAcervo === cat.id ? 'bg-yellow-400 text-purple-950' : 'bg-white/5 text-purple-200/80 hover:bg-white/10'
                 }`}
               >
                 {cat.label}
@@ -1209,8 +1313,16 @@ function App() {
           {fotosAcervo.length > 0 ? (
             <div className="flex justify-center pb-14">
               <div
-                className="relative w-[300px] sm:w-[360px] md:w-[420px] aspect-[4/5] max-w-full"
+                className="relative w-[300px] sm:w-[360px] md:w-[420px] aspect-[4/5] max-w-full rounded-[2rem]"
                 style={{ perspective: 1200 }}
+                role="region"
+                aria-roledescription="carrossel"
+                aria-label={`Fotos — ${categoriaAcervoLabel}`}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowRight') { e.preventDefault(); proximaFoto(); }
+                  else if (e.key === 'ArrowLeft') { e.preventDefault(); fotoAnterior(); }
+                }}
               >
                 {Array.from({ length: Math.min(PILHA_TAMANHO, fotosAcervo.length) }, (_, i) => i)
                   .slice().reverse()
@@ -1223,7 +1335,8 @@ function App() {
                         key={src}
                         layout
                         src={src}
-                        alt={`Foto ${idx + 1}`}
+                        alt={pos === 0 ? `${categoriaAcervoLabel} — foto ${idx + 1} de ${fotosAcervo.length}` : ''}
+                        aria-hidden={pos === 0 ? undefined : true}
                         loading="lazy"
                         drag={pos === 0 ? 'x' : false}
                         dragConstraints={{ left: 0, right: 0 }}
@@ -1243,13 +1356,13 @@ function App() {
                       />
                     );
                   })}
-                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={fotoAnterior} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-9 h-9 rounded-full z-30 font-black text-sm shadow-xl">←</motion.button>
-                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={proximaFoto} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-9 h-9 rounded-full z-30 font-black text-sm shadow-xl">→</motion.button>
+                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={fotoAnterior} aria-label="Foto anterior" className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-11 h-11 rounded-full z-30 font-black text-base shadow-xl transition-colors"><span aria-hidden="true">←</span></motion.button>
+                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={proximaFoto} aria-label="Próxima foto" className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-400 hover:text-purple-900 w-11 h-11 rounded-full z-30 font-black text-base shadow-xl transition-colors"><span aria-hidden="true">→</span></motion.button>
                 <div className="absolute -bottom-10 left-0 right-0 flex flex-col items-center gap-3">
-                  <span className="bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-[12px] font-black tracking-widest border border-white/20">
+                  <span aria-live="polite" className="bg-black/60 backdrop-blur-md px-6 py-2 rounded-full text-[12px] font-black tracking-widest border border-white/20 tabular-nums">
                     {fotoAtual + 1} / {fotosAcervo.length}
                   </span>
-                  <div className="w-1/2 h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-1/2 h-1 bg-white/10 rounded-full overflow-hidden" aria-hidden="true">
                     <div
                       className="h-full bg-yellow-400 transition-all duration-300"
                       style={{ width: `${((fotoAtual + 1) / fotosAcervo.length) * 100}%` }}
@@ -1298,15 +1411,21 @@ function App() {
               { t: "Voluntário", d: "Compartilhe seu talento conosco.", b: "Quero Ajudar", link: "https://wa.me/5521965540576" }
             ].map((item, idx) => (
               <motion.div key={idx}
-                className="bg-[#1F1235] p-12 rounded-[3.5rem] border border-white/5 flex flex-col h-full shadow-xl"
+                className="bg-[#1F1235] p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-white/5 flex flex-col h-full shadow-xl"
                 initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
                 transition={{ duration: 0.7, ease: 'easeOut', delay: idx * 0.1 }}
                 whileHover={{ y: -8 }}
               >
                 <h3 className="text-2xl font-black mb-4 uppercase">{item.t}</h3>
-                <p className="text-purple-200/60 mb-8">{item.d}</p>
+                <p className={`text-purple-200/80 ${item.act ? 'mb-4' : 'mb-8'}`}>{item.d}</p>
+                {item.act && (
+                  <p className="mb-8 text-sm text-purple-200/80">
+                    Chave PIX (telefone):{' '}
+                    <span className="select-all whitespace-nowrap font-black text-yellow-400 tabular-nums">{CHAVE_PIX_EXIBICAO}</span>
+                  </p>
+                )}
                 {item.act ? (
-                  <button onClick={item.act} className="mt-auto bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors shadow-md">{item.b}</button>
+                  <button onClick={item.act} aria-label="Copiar chave PIX" className="mt-auto bg-white text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-yellow-400 transition-colors shadow-md">{item.b}</button>
                 ) : (
                   <a href={item.link} target="_blank" rel="noreferrer" className="mt-auto inline-block bg-yellow-400 text-purple-950 px-10 py-4 rounded-2xl font-black text-sm uppercase hover:bg-white text-center transition-colors shadow-md">{item.b}</a>
                 )}
@@ -1323,7 +1442,7 @@ function App() {
             initial="hidden" whileInView="visible" viewport={REVEAL_VIEWPORT} variants={fadeUp}
           >
             <h2 className="text-5xl font-black mb-6 uppercase italic tracking-tighter">Parceiros &amp; Licenças</h2>
-            <p className="text-purple-200/60 max-w-2xl mx-auto mb-16">
+            <p className="text-purple-200/80 max-w-2xl mx-auto mb-16">
               Organizações e programas que apoiam o trabalho do Instituto Tia Pretinha.
             </p>
           </motion.div>
@@ -1362,7 +1481,7 @@ function App() {
                 ) : (
                   <p className="text-xl font-black uppercase">{l.nome}</p>
                 )}
-                <p className="text-xs text-purple-300/60 leading-relaxed">{l.desc}</p>
+                <p className="text-xs text-purple-300/80 leading-relaxed">{l.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -1386,33 +1505,15 @@ function App() {
 
       {/* MODAL PROJETOS */}
       <AnimatePresence>
-      {projetoSelecionado && (
-        <motion.div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-purple-950/98 backdrop-blur-xl"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={() => setProjetoSelecionado(null)}
-        >
-          <motion.div
-            className="bg-white text-purple-950 max-w-2xl w-full rounded-[2rem] md:rounded-[4rem] p-6 md:p-12 relative shadow-[0_0_100px_rgba(0,0,0,0.5)]"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button onClick={() => setProjetoSelecionado(null)} className="absolute top-8 right-10 text-3xl font-black">✕</button>
-            <h3 className="text-4xl font-black uppercase mb-6 tracking-tighter">{projetoSelecionado.titulo}</h3>
-            <p className="text-xl text-slate-700 mb-10 leading-relaxed font-light italic">"{projetoSelecionado.detalhe}"</p>
-            <button onClick={() => setProjetoSelecionado(null)} className="bg-purple-700 text-white px-8 py-5 rounded-2xl font-black w-full uppercase tracking-widest shadow-lg">Fechar</button>
-          </motion.div>
-        </motion.div>
-      )}
+        {projetoSelecionado && (
+          <ModalProjeto projeto={projetoSelecionado} onFechar={fecharProjeto} />
+        )}
       </AnimatePresence>
 
       {/* FOOTER */}
-      <footer className="bg-black py-16 px-4 md:px-8 text-center border-t border-white/5">
-        <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em]">© 2025 Instituto Tia Pretinha • Todos os direitos reservados</p>
-        <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-2">CNPJ 11.759.851/0001-39</p>
+      <footer className="bg-black py-16 pb-[calc(4rem+env(safe-area-inset-bottom))] px-4 md:px-8 text-center border-t border-white/5">
+        <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.3em] md:tracking-[0.4em]">© {new Date().getFullYear()} Instituto Tia Pretinha • Todos os direitos reservados</p>
+        <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest mt-2">CNPJ 11.759.851/0001-39</p>
         <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-6 italic">Arquitetura Digital por Erick Gonçalves Cardoso</p>
       </footer>
     </div>

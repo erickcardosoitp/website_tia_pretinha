@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 
 /**
  * MARKETPLACE — INSTITUTO TIA PRETINHA
@@ -72,42 +72,42 @@ const PIX = '21965540576'
 
 // ─── ÍCONES ───────────────────────────────────────────────────────────────────
 const IcoCart = ({ className = 'w-5 h-5' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
   </svg>
 )
 const IcoSearch = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
   </svg>
 )
 const IcoPlus = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+  <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
   </svg>
 )
 const IcoMinus = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+  <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
   </svg>
 )
 const IcoTrash = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
   </svg>
 )
 const IcoX = ({ className = 'w-5 h-5' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+  <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 )
 const IcoWpp = ({ className = 'w-5 h-5' }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+  <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
   </svg>
 )
 const IcoChevron = ({ className = 'w-4 h-4' }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
   </svg>
 )
@@ -119,7 +119,7 @@ export default function Marketplace() {
   const [ordenacao, setOrdenacao]           = useState('relevancia')
   const [carrinho, setCarrinho]             = useState([])
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
-  const [pixCopiado, setPixCopiado]         = useState(false)
+  const [pixCopiado, setPixCopiado]         = useState(null) // null | 'copiada' | 'falhou'
 
   // ── Carrinho helpers ──────────────────────────────────────────────────────
   const addItem = (p) =>
@@ -139,7 +139,9 @@ export default function Marketplace() {
     })
 
   const removeItemTotal = (id) => setCarrinho(prev => prev.filter(i => i.id !== id))
-  const limparCarrinho  = () => setCarrinho([])
+  const limparCarrinho  = () => {
+    if (window.confirm('Remover todos os itens do carrinho?')) setCarrinho([])
+  }
 
   const totalQtd   = carrinho.reduce((a, i) => a + i.qtd, 0)
   const totalPreco = carrinho.reduce((a, i) => a + i.preco * i.qtd, 0)
@@ -164,11 +166,33 @@ export default function Marketplace() {
   }, [busca, categoria, ordenacao])
 
   // ── PIX ──────────────────────────────────────────────────────────────────
-  const copiarPix = () => {
-    navigator.clipboard.writeText(PIX)
-    setPixCopiado(true)
-    setTimeout(() => setPixCopiado(false), 3000)
+  const copiarPix = async () => {
+    try {
+      await navigator.clipboard.writeText(PIX)
+      setPixCopiado('copiada')
+    } catch {
+      // Sem permissão de clipboard: mostra a chave para copiar manualmente
+      setPixCopiado('falhou')
+    }
+    setTimeout(() => setPixCopiado(null), 4000)
   }
+
+  // ── Modal do carrinho: Esc fecha, trava rolagem do fundo, foco no botão fechar ──
+  const botaoFecharCarrinhoRef = useRef(null)
+  useEffect(() => {
+    if (!carrinhoAberto) return
+    const focoAnterior = document.activeElement
+    const overflowAnterior = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    botaoFecharCarrinhoRef.current?.focus()
+    const aoTeclar = (e) => { if (e.key === 'Escape') setCarrinhoAberto(false) }
+    document.addEventListener('keydown', aoTeclar)
+    return () => {
+      document.removeEventListener('keydown', aoTeclar)
+      document.body.style.overflow = overflowAnterior
+      focoAnterior?.focus?.()
+    }
+  }, [carrinhoAberto])
 
   // ── Finalizar ─────────────────────────────────────────────────────────────
   const finalizarPedido = () => {
@@ -186,10 +210,18 @@ export default function Marketplace() {
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
 
       {/* ── TOAST PIX ── */}
-      <div className={`fixed bottom-6 right-6 z-[600] transition-all duration-400 ${pixCopiado ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-        <div className="bg-[#2D1B4D] text-yellow-400 px-6 py-3 rounded-2xl font-bold shadow-2xl flex items-center gap-3 text-sm">
-          ✓ Chave PIX copiada!
-        </div>
+      <div
+        role="status"
+        aria-live="polite"
+        className={`fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-4 left-4 sm:left-auto sm:right-6 z-[600] transition-[opacity,transform] duration-300 ${pixCopiado ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+      >
+        {pixCopiado && (
+          <div className="bg-[#2D1B4D] text-yellow-400 px-6 py-3 rounded-2xl font-bold shadow-2xl flex items-center gap-3 text-sm">
+            {pixCopiado === 'copiada'
+              ? '✓ Chave PIX copiada!'
+              : <span>Não foi possível copiar. Chave PIX (telefone): <span className="select-all whitespace-nowrap">{PIX}</span></span>}
+          </div>
+        )}
       </div>
 
       {/* ══ HEADER ══════════════════════════════════════════════════════════ */}
@@ -198,12 +230,13 @@ export default function Marketplace() {
 
           {/* Logo + voltar */}
           <div className="flex items-center gap-4 flex-shrink-0">
-            <img
-              src="/png_instituto.jpg"
-              alt="Instituto Tia Pretinha"
-              className="h-9 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => window.location.href = '/'}
-            />
+            <a href="/" className="flex-shrink-0 rounded-lg">
+              <img
+                src="/png_instituto.jpg"
+                alt="Instituto Tia Pretinha — voltar ao site"
+                className="h-9 hover:opacity-80 transition-opacity"
+              />
+            </a>
             <a href="/" className="hidden sm:flex items-center gap-1 text-purple-300 hover:text-white text-xs font-semibold transition-colors">
               ← Voltar ao site
             </a>
@@ -214,17 +247,22 @@ export default function Marketplace() {
           {/* Barra de busca central */}
           <div className="flex-1 max-w-lg mx-4 relative">
             <IcoSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <label htmlFor="busca-produto" className="sr-only">Buscar produto</label>
             <input
-              type="text"
+              id="busca-produto"
+              name="busca"
+              type="search"
+              autoComplete="off"
               value={busca}
               onChange={e => setBusca(e.target.value)}
-              placeholder="Buscar produto..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-white/10 bg-white/10 text-white placeholder-white/40 text-sm outline-none focus:bg-white/15 focus:border-yellow-400/50 transition-all"
+              placeholder="Buscar produto…"
+              className="w-full pl-9 pr-10 py-2 rounded-xl border border-white/10 bg-white/10 text-white placeholder-white/50 text-base sm:text-sm outline-none focus:bg-white/15 focus:border-yellow-400 transition-colors [&::-webkit-search-cancel-button]:hidden"
             />
             {busca && (
               <button
                 onClick={() => setBusca('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                aria-label="Limpar busca"
+                className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-white/60 hover:text-white transition-colors"
               >
                 <IcoX className="w-4 h-4" />
               </button>
@@ -234,12 +272,13 @@ export default function Marketplace() {
           {/* Botão carrinho */}
           <button
             onClick={() => setCarrinhoAberto(true)}
-            className="relative flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-purple-950 px-4 py-2 rounded-xl font-bold text-sm transition-all active:scale-95 flex-shrink-0"
+            aria-label={`Abrir carrinho${totalQtd > 0 ? ` (${totalQtd} ${totalQtd === 1 ? 'item' : 'itens'})` : ''}`}
+            className="relative flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-purple-950 px-4 py-2.5 rounded-xl font-bold text-sm transition-[background-color,transform] active:scale-95 flex-shrink-0"
           >
             <IcoCart className="w-5 h-5" />
             <span className="hidden sm:inline">Carrinho</span>
             {totalQtd > 0 && (
-              <span className="absolute -top-2 -right-2 bg-[#2D1B4D] text-yellow-400 border border-yellow-400/30 w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center">
+              <span aria-hidden="true" className="absolute -top-2 -right-2 bg-[#2D1B4D] text-yellow-400 border border-yellow-400/30 w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center">
                 {totalQtd}
               </span>
             )}
@@ -262,7 +301,8 @@ export default function Marketplace() {
                   <li key={cat}>
                     <button
                       onClick={() => setCategoria(cat)}
-                      className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                      aria-pressed={categoria === cat}
+                      className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                         categoria === cat
                           ? 'bg-[#2D1B4D] text-yellow-400'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -283,7 +323,8 @@ export default function Marketplace() {
                   <li key={o.value}>
                     <button
                       onClick={() => setOrdenacao(o.value)}
-                      className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                      aria-pressed={ordenacao === o.value}
+                      className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                         ordenacao === o.value
                           ? 'bg-[#2D1B4D] text-yellow-400'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -302,8 +343,8 @@ export default function Marketplace() {
         <div className="flex-1 min-w-0">
 
           {/* Barra de filtros mobile + info de resultados */}
-          <div className="flex items-center justify-between mb-6 gap-4">
-            <p className="text-sm text-gray-500">
+          <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
+            <p className="text-sm text-gray-500" aria-live="polite">
               <span className="font-bold text-gray-900">{produtosFiltrados.length}</span> produto{produtosFiltrados.length !== 1 ? 's' : ''} encontrado{produtosFiltrados.length !== 1 ? 's' : ''}
             </p>
 
@@ -314,7 +355,8 @@ export default function Marketplace() {
                 <select
                   value={categoria}
                   onChange={e => setCategoria(e.target.value)}
-                  className="appearance-none bg-white border border-gray-200 text-sm font-semibold text-gray-700 pl-3 pr-8 py-2 rounded-xl shadow-sm outline-none focus:border-purple-400 cursor-pointer"
+                  aria-label="Filtrar por categoria"
+                  className="appearance-none bg-white border border-gray-200 text-base sm:text-sm font-semibold text-gray-700 pl-3 pr-8 py-2.5 rounded-xl shadow-sm outline-none focus:border-purple-400 cursor-pointer"
                 >
                   {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -326,7 +368,8 @@ export default function Marketplace() {
                 <select
                   value={ordenacao}
                   onChange={e => setOrdenacao(e.target.value)}
-                  className="appearance-none bg-white border border-gray-200 text-sm font-semibold text-gray-700 pl-3 pr-8 py-2 rounded-xl shadow-sm outline-none focus:border-purple-400 cursor-pointer"
+                  aria-label="Ordenar produtos"
+                  className="appearance-none bg-white border border-gray-200 text-base sm:text-sm font-semibold text-gray-700 pl-3 pr-8 py-2.5 rounded-xl shadow-sm outline-none focus:border-purple-400 cursor-pointer"
                 >
                   {ORDENACOES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
@@ -339,7 +382,8 @@ export default function Marketplace() {
               <select
                 value={ordenacao}
                 onChange={e => setOrdenacao(e.target.value)}
-                className="appearance-none bg-white border border-gray-200 text-sm font-semibold text-gray-700 pl-3 pr-8 py-2 rounded-xl shadow-sm outline-none focus:border-purple-400 cursor-pointer"
+                aria-label="Ordenar produtos"
+                className="appearance-none bg-white border border-gray-200 text-base sm:text-sm font-semibold text-gray-700 pl-3 pr-8 py-2.5 rounded-xl shadow-sm outline-none focus:border-purple-400 cursor-pointer"
               >
                 {ORDENACOES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
@@ -355,9 +399,9 @@ export default function Marketplace() {
               <p className="text-sm mt-2">Tente outro termo ou categoria</p>
               <button
                 onClick={() => { setBusca(''); setCategoria('Todas') }}
-                className="mt-6 px-6 py-2 bg-[#2D1B4D] text-yellow-400 rounded-xl text-sm font-bold hover:bg-[#1F1235] transition-colors"
+                className="mt-6 px-6 py-2.5 bg-[#2D1B4D] text-yellow-400 rounded-xl text-sm font-bold hover:bg-[#1F1235] transition-colors"
               >
-                Limpar filtros
+                Limpar Filtros
               </button>
             </div>
           ) : (
@@ -367,7 +411,7 @@ export default function Marketplace() {
                 return (
                   <article
                     key={p.id}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-[box-shadow,transform] duration-200"
                   >
                     {/* Foto */}
                     <div className="h-64 bg-gray-100 overflow-hidden flex-shrink-0">
@@ -400,7 +444,7 @@ export default function Marketplace() {
 
                       {/* Preço + botão */}
                       <div className="flex items-center justify-between gap-3 mt-auto pt-4 border-t border-gray-50">
-                        <span className="text-2xl font-black text-[#2D1B4D]">
+                        <span className="text-2xl font-black text-[#2D1B4D] tabular-nums">
                           R$ <span>{p.preco.toFixed(2).replace('.', ',')}</span>
                         </span>
 
@@ -409,18 +453,21 @@ export default function Marketplace() {
                           <div className="flex items-center border border-[#2D1B4D] rounded-xl overflow-hidden">
                             <button
                               onClick={() => subItem(p.id)}
-                              className="w-9 h-9 flex items-center justify-center text-[#2D1B4D] hover:bg-purple-50 transition-colors"
+                              aria-label={`Diminuir quantidade de ${p.nome}`}
+                              className="w-11 h-11 flex items-center justify-center text-[#2D1B4D] hover:bg-purple-50 transition-colors"
                             ><IcoMinus /></button>
-                            <span className="w-8 text-center text-sm font-bold text-[#2D1B4D]">{qtdNoCart}</span>
+                            <span className="w-8 text-center text-sm font-bold text-[#2D1B4D] tabular-nums" aria-live="polite">{qtdNoCart}</span>
                             <button
                               onClick={() => addItem(p)}
-                              className="w-9 h-9 flex items-center justify-center text-[#2D1B4D] hover:bg-purple-50 transition-colors"
+                              aria-label={`Aumentar quantidade de ${p.nome}`}
+                              className="w-11 h-11 flex items-center justify-center text-[#2D1B4D] hover:bg-purple-50 transition-colors"
                             ><IcoPlus /></button>
                           </div>
                         ) : (
                           <button
                             onClick={() => addItem(p)}
-                            className="flex items-center gap-2 bg-[#2D1B4D] hover:bg-[#1F1235] text-yellow-400 px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-sm"
+                            aria-label={`Adicionar ${p.nome} ao carrinho`}
+                            className="flex items-center gap-2 bg-[#2D1B4D] hover:bg-[#1F1235] text-yellow-400 px-4 py-3 rounded-xl text-sm font-bold transition-[background-color,transform] active:scale-95 shadow-sm"
                           >
                             <IcoCart className="w-4 h-4" /> Adicionar
                           </button>
@@ -438,18 +485,21 @@ export default function Marketplace() {
       {/* ══ MODAL CARRINHO ══════════════════════════════════════════════════ */}
       {carrinhoAberto && (
         <div
-          className="fixed inset-0 z-[300] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-6"
+          className="fixed inset-0 z-[300] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-6 overscroll-contain"
           onClick={() => setCarrinhoAberto(false)}
         >
           <div
-            className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="carrinho-titulo"
+            className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[92dvh] overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
             {/* Header carrinho */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <IcoCart className="w-5 h-5 text-[#2D1B4D]" />
-                <h2 className="font-bold text-lg text-gray-900">Carrinho</h2>
+                <h2 id="carrinho-titulo" className="font-bold text-lg text-gray-900">Carrinho</h2>
                 {totalQtd > 0 && (
                   <span className="bg-[#2D1B4D] text-yellow-400 text-xs font-bold px-2 py-0.5 rounded-full">
                     {totalQtd} {totalQtd === 1 ? 'item' : 'itens'}
@@ -460,14 +510,16 @@ export default function Marketplace() {
                 {carrinho.length > 0 && (
                   <button
                     onClick={limparCarrinho}
-                    className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-xs font-bold uppercase tracking-wide transition-colors"
+                    className="flex items-center gap-1.5 text-red-500 hover:text-red-700 text-xs font-bold uppercase tracking-wide transition-colors px-2 py-2"
                   >
                     <IcoTrash className="w-3.5 h-3.5" /> Limpar
                   </button>
                 )}
                 <button
+                  ref={botaoFecharCarrinhoRef}
                   onClick={() => setCarrinhoAberto(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                  aria-label="Fechar carrinho"
+                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
                 >
                   <IcoX className="w-4 h-4" />
                 </button>
@@ -475,7 +527,7 @@ export default function Marketplace() {
             </div>
 
             {/* Itens */}
-            <div className="flex-grow overflow-y-auto px-6 py-4 space-y-3">
+            <div className="flex-grow overflow-y-auto overscroll-contain px-6 py-4 space-y-3">
               {carrinho.length === 0 ? (
                 <div className="text-center py-16 text-gray-400">
                   <IcoCart className="w-12 h-12 mx-auto mb-4 opacity-20" />
@@ -511,14 +563,15 @@ export default function Marketplace() {
                     <div className="flex flex-col items-end justify-between flex-shrink-0">
                       <button
                         onClick={() => removeItemTotal(item.id)}
-                        className="text-gray-300 hover:text-red-400 transition-colors"
+                        aria-label={`Remover ${item.nome} do carrinho`}
+                        className="p-2 -m-2 text-gray-400 hover:text-red-500 transition-colors"
                       >
                         <IcoTrash className="w-4 h-4" />
                       </button>
                       <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
-                        <button onClick={() => subItem(item.id)} className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><IcoMinus className="w-3 h-3" /></button>
-                        <span className="w-7 text-center text-sm font-bold text-gray-900">{item.qtd}</span>
-                        <button onClick={() => addItem(item)} className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><IcoPlus className="w-3 h-3" /></button>
+                        <button onClick={() => subItem(item.id)} aria-label={`Diminuir quantidade de ${item.nome}`} className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><IcoMinus className="w-3 h-3" /></button>
+                        <span className="w-7 text-center text-sm font-bold text-gray-900 tabular-nums">{item.qtd}</span>
+                        <button onClick={() => addItem(item)} aria-label={`Aumentar quantidade de ${item.nome}`} className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><IcoPlus className="w-3 h-3" /></button>
                       </div>
                     </div>
                   </div>
@@ -528,10 +581,10 @@ export default function Marketplace() {
 
             {/* Rodapé */}
             {carrinho.length > 0 && (
-              <div className="px-6 py-5 border-t border-gray-100 space-y-3 bg-white">
+              <div className="px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] border-t border-gray-100 space-y-3 bg-white">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500 font-medium">Total</span>
-                  <span className="text-2xl font-black text-[#2D1B4D]">
+                  <span className="text-2xl font-black text-[#2D1B4D] tabular-nums">
                     R$ {totalPreco.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
@@ -545,9 +598,9 @@ export default function Marketplace() {
 
                 <button
                   onClick={copiarPix}
-                  className="w-full bg-gray-50 hover:bg-yellow-50 border border-gray-200 hover:border-yellow-300 text-gray-700 hover:text-[#2D1B4D] font-bold py-3 rounded-2xl flex items-center justify-center gap-2 transition-all text-sm"
+                  className="w-full bg-gray-50 hover:bg-yellow-50 border border-gray-200 hover:border-yellow-300 text-gray-700 hover:text-[#2D1B4D] font-bold py-3 rounded-2xl flex items-center justify-center gap-2 transition-colors text-sm"
                 >
-                  📋 Copiar chave PIX ({PIX})
+                  <span aria-hidden="true">📋</span> Copiar Chave PIX ({PIX})
                 </button>
               </div>
             )}
@@ -556,8 +609,8 @@ export default function Marketplace() {
       )}
 
       {/* ══ FOOTER ══════════════════════════════════════════════════════════ */}
-      <footer className="mt-20 bg-[#1F1235] py-12 px-8 text-center border-t border-white/5">
-        <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em]">© 2025 Instituto Tia Pretinha • Todos os direitos reservados</p>
+      <footer className="mt-20 bg-[#1F1235] py-12 pb-[calc(3rem+env(safe-area-inset-bottom))] px-4 md:px-8 text-center border-t border-white/5">
+        <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.3em] md:tracking-[0.4em]">© {new Date().getFullYear()} Instituto Tia Pretinha • Todos os direitos reservados</p>
         <p className="text-[11px] text-yellow-500/50 font-black uppercase tracking-widest mt-4 italic">Arquitetura Digital por Erick Gonçalves Cardoso</p>
       </footer>
     </div>
