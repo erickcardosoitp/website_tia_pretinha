@@ -27,3 +27,33 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background-color: #fde047;
 }
+/* Âncoras do menu: rolagem suave e título não fica atrás da navbar fixa */
+html {
+  scroll-behavior: smooth;
+}
+section[id], header[id] {
+  scroll-margin-top: 5rem;
+}
+@media (min-width: 768px) {
+  section[id], header[id] {
+    scroll-margin-top: 6.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Remove o atraso de toque duplo no mobile */
+a, button, input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+/* Foco visível para navegação por teclado (não aparece no clique/toque) */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #FACC15;
+    outline-offset: 3px;
+  }
+}
