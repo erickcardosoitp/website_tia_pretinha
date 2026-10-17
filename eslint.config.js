@@ -29,4 +29,9 @@ export default defineConfig([
       'react/jsx-uses-vars': 'error',
     },
   },
+  {
+    // Ponto de entrada: não exporta componentes, então fast refresh não se aplica.
+    files: ['src/main.jsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])
