@@ -9,6 +9,17 @@ import { reportarErro } from './reportarErro.js'
 
 const Marketplace = lazy(() => import('./marketplace.jsx'))
 
+// Aba aberta durante um deploy pede um chunk que o deploy apagou (PRB-0074/0075,
+// /marketplace em 03/11): recarrega uma vez para buscar o index novo.
+window.addEventListener('vite:preloadError', (e) => {
+  try {
+    if (sessionStorage.getItem('recarregou-apos-deploy')) return
+    sessionStorage.setItem('recarregou-apos-deploy', '1')
+  } catch { return } // sem sessionStorage não dá para evitar laço de recarga
+  e.preventDefault()
+  window.location.reload()
+})
+
 // Cobre o que NENHUM Error Boundary React alcança: erro em handler de
 // evento, setTimeout, promise rejeitada sem .catch (limitação conhecida
 // do React — boundary só pega erro durante render/lifecycle da árvore).
